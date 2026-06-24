@@ -1,0 +1,4 @@
+
+npm install
+npm install -g @angular/cli@12
+ng s -o

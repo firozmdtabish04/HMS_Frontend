@@ -1,0 +1,223 @@
+<app-header></app-header>
+
+<div class="page-shell">
+  <div class="bg-orb orb-one"></div>
+  <div class="bg-orb orb-two"></div>
+
+  <div class="page-wrapper">
+    <!-- Hero Section -->
+    <div class="hero-card">
+      <div class="hero-left">
+        <div class="hero-badge">
+          <i class="fa fa-shield"></i>
+          Verification Console
+        </div>
+
+        <h1 class="heading">
+          Approve Doctors Here
+        </h1>
+
+        <p class="hero-subtitle">
+          Review doctor applications, verify credentials, and manage approval
+          status with a clean administrative workflow.
+        </p>
+      </div>
+
+      <div class="hero-right">
+        <div class="status-summary">
+          <div class="summary-icon">
+            <i class="fa fa-user-md"></i>
+          </div>
+          <div>
+            <span class="summary-label">Module</span>
+            <strong class="summary-value">Doctor Approval</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar-card">
+      <div class="toolbar-left">
+        <div class="toolbar-title">
+          <i class="fa fa-search"></i>
+          Search & Filter
+        </div>
+        <p class="toolbar-subtitle">
+          Search by doctor name, email, or specialization.
+        </p>
+      </div>
+
+      <div class="search-box">
+        <i class="fa fa-search search-icon"></i>
+        <input
+          type="text"
+          placeholder="Search doctor by name, email, specialization..."
+          [(ngModel)]="searchText"
+        />
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="state-card loading-state" *ngIf="loading">
+      <div class="loader"></div>
+      <p>Loading doctors...</p>
+    </div>
+
+    <!-- Error -->
+    <div class="state-card error-state" *ngIf="error">
+      <i class="fa fa-exclamation-triangle"></i>
+      <span>{{ error }}</span>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-card" *ngIf="!loading">
+      <div class="table-header">
+        <div>
+          <h2>Doctor Approval Registry</h2>
+          <p>Manage doctor onboarding requests and current approval statuses.</p>
+        </div>
+
+        <button class="refresh-btn" type="button" (click)="loadDoctors()">
+          <i class="fa fa-refresh"></i>
+          Refresh
+        </button>
+      </div>
+
+      <div class="table-container">
+        <table *ngIf="(doctors | async)?.length; else noData">
+          <thead>
+            <tr>
+              <th>Identity</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Gender</th>
+              <th>Experience</th>
+              <th>Specialization</th>
+              <th>Worked At</th>
+              <th>Mobile</th>
+              <th>Status / Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr
+              *ngFor="let doctor of doctors | async; trackBy: trackByDoctor"
+              [hidden]="!filterDoctor(doctor)"
+            >
+              <td>
+                <div class="identity-cell">
+                  <img
+                    [src]="getDoctorImage(doctor)"
+                    class="doc-img"
+                    alt="Doctor Image"
+                  />
+                </div>
+              </td>
+
+              <td>
+                <div class="primary-text">{{ doctor.doctorname }}</div>
+              </td>
+
+              <td>
+                <div class="secondary-text">{{ doctor.email }}</div>
+              </td>
+
+              <td>
+                <span class="gender-badge">{{ doctor.gender }}</span>
+              </td>
+
+              <td>
+                <span class="metric-chip">{{ doctor.experience }} yrs</span>
+              </td>
+
+              <td>
+                <span class="specialization-chip">
+                  {{ doctor.specialization }}
+                </span>
+              </td>
+
+              <td>
+                <span class="hospital-chip">
+                  {{ doctor.previoushospital }}
+                </span>
+              </td>
+
+              <td>
+                <span class="mobile-text">{{ doctor.mobile }}</span>
+              </td>
+
+              <td>
+                <!-- ADMIN VIEW -->
+                <ng-container *ngIf="currRole === 'admin'">
+                  <ng-container *ngIf="doctor.status === 'false'; else showStatus">
+                    <div class="action-group">
+                      <button
+                        class="accepted action-btn"
+                        (click)="acceptRequest(doctor.email!)"
+                      >
+                        <i class="fa fa-check"></i>
+                        Accept
+                      </button>
+
+                      <button
+                        class="rejected action-btn"
+                        (click)="rejectRequest(doctor.email!)"
+                      >
+                        <i class="fa fa-times"></i>
+                        Reject
+                      </button>
+                    </div>
+                  </ng-container>
+
+                  <ng-template #showStatus>
+                    <span class="status" [ngClass]="getStatusClass(doctor.status)">
+                      <i
+                        class="fa"
+                        [ngClass]="{
+                          'fa-clock-o': doctor.status === 'false',
+                          'fa-check-circle': doctor.status === 'accept',
+                          'fa-times-circle': doctor.status === 'reject'
+                        }"
+                      ></i>
+                      {{ getStatusLabel(doctor.status) }}
+                    </span>
+                  </ng-template>
+                </ng-container>
+
+                <!-- DOCTOR VIEW -->
+                <ng-container
+                  *ngIf="currRole === 'DOCTOR' && doctor.email === loggedUser"
+                >
+                  <span class="status" [ngClass]="getStatusClass(doctor.status)">
+                    <i
+                      class="fa"
+                      [ngClass]="{
+                        'fa-clock-o': doctor.status === 'false',
+                        'fa-check-circle': doctor.status === 'accept',
+                        'fa-times-circle': doctor.status === 'reject'
+                      }"
+                    ></i>
+                    {{ getStatusLabel(doctor.status) }}
+                  </span>
+                </ng-container>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <ng-template #noData>
+          <div class="empty-state">
+            <div class="empty-icon">
+              <i class="fa fa-folder-open-o"></i>
+            </div>
+            <h3>No doctors found</h3>
+            <p>No doctor records are available at the moment.</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer>
