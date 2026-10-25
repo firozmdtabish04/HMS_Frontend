@@ -7,3 +7,5 @@ npx ng version
 npm install -g @angular/cli@12
 ng s -o
 npx ng serve -o
+
+ng serve
