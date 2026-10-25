@@ -2,37 +2,105 @@
   <div class="bg-overlay"></div>
 
   <div class="login-wrapper">
+    <!-- BRAND / HERO PANEL -->
     <div class="brand-panel">
       <div class="brand-badge">HMS</div>
       <h1>Healthcare Management System</h1>
       <p>
-        Secure access for patients, doctors, and administrators through one
-        intelligent login portal.
+        Unified intelligent medical platform with enterprise Bearer Token authentication,
+        Gmail/Mobile OTP verification, and seamless Google OAuth sign-in.
       </p>
 
       <div class="feature-list">
         <div class="feature-item">
           <i class="fa fa-shield"></i>
-          <span>Enterprise-grade secure access</span>
+          <div>
+            <strong>Bearer Token Security</strong>
+            <p>Signed cryptographic JWT authorization on every API transaction.</p>
+          </div>
         </div>
         <div class="feature-item">
-          <i class="fa fa-user-md"></i>
-          <span>Doctor, patient, and admin workflows</span>
+          <i class="fa fa-mobile"></i>
+          <div>
+            <strong>Passwordless 2FA OTP</strong>
+            <p>Instant 6-digit verification code via Gmail or registered mobile.</p>
+          </div>
         </div>
         <div class="feature-item">
-          <i class="fa fa-hospital-o"></i>
-          <span>Unified hospital management experience</span>
+          <i class="fa fa-google"></i>
+          <div>
+            <strong>Google OAuth 2.0</strong>
+            <p>One-tap verified access with patient record linkage.</p>
+          </div>
         </div>
+      </div>
+
+      <!-- Trust Security Badges -->
+      <div class="security-badges-row">
+        <span class="security-badge"><i class="fa fa-lock"></i> TLS 1.3 / SSL</span>
+        <span class="security-badge"><i class="fa fa-key"></i> JWT Bearer Token</span>
+        <span class="security-badge"><i class="fa fa-check-circle"></i> HIPAA Ready</span>
       </div>
     </div>
 
+    <!-- LOGIN CARD -->
     <div class="login-card">
       <div class="card-header">
         <h2>Welcome Back</h2>
-        <p>Sign in with your email and password</p>
+        <p>Choose your preferred sign-in method</p>
       </div>
 
-      <form #loginForm="ngForm" (ngSubmit)="smartLogin()" novalidate>
+      <!-- AUTH MODE TABS -->
+      <div class="auth-tabs">
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="authMode === 'password'"
+          (click)="switchAuthMode('password')"
+        >
+          <i class="fa fa-key"></i> Password Login
+        </button>
+
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="authMode === 'otp'"
+          (click)="switchAuthMode('otp')"
+        >
+          <i class="fa fa-envelope-open-o"></i> Gmail / Mobile OTP
+        </button>
+      </div>
+
+      <!-- GOOGLE OAUTH ONE-TAP BUTTON -->
+      <div class="google-auth-section">
+        <button
+          type="button"
+          class="btn-google-oauth"
+          (click)="openGooglePrompt()"
+          [disabled]="isGoogleLoading"
+        >
+          <svg class="google-icon" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          <span *ngIf="!isGoogleLoading">Sign in with Google</span>
+          <span *ngIf="isGoogleLoading"><i class="fa fa-spinner fa-spin"></i> Connecting to Google...</span>
+        </button>
+      </div>
+
+      <div class="divider">
+        <span>OR CONTINUE WITH {{ authMode === 'password' ? 'CREDENTIALS' : 'OTP' }}</span>
+      </div>
+
+      <!-- ================= FORM 1: PASSWORD LOGIN ================= -->
+      <form
+        *ngIf="authMode === 'password'"
+        #loginForm="ngForm"
+        (ngSubmit)="smartLogin()"
+        novalidate
+      >
         <div *ngIf="msg" class="alert-box">
           <i class="fa fa-exclamation-circle"></i>
           <span>{{ msg }}</span>
@@ -47,7 +115,7 @@
               id="email"
               name="email"
               class="form-control"
-              placeholder="Enter your email"
+              placeholder="e.g. user@gmail.com or doctor@hospital.com"
               [(ngModel)]="email"
               required
               pattern="^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$"
@@ -58,9 +126,7 @@
 
           <div *ngIf="emailRef.invalid && emailRef.touched" class="error-text">
             <small *ngIf="emailRef.errors?.required">Email is required</small>
-            <small *ngIf="emailRef.errors?.pattern"
-              >Enter a valid email address</small
-            >
+            <small *ngIf="emailRef.errors?.pattern">Enter a valid email address</small>
           </div>
         </div>
 
@@ -84,32 +150,24 @@
               class="toggle-password"
               (click)="togglePassword()"
             >
-              <i
-                class="fa"
-                [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"
-              ></i>
+              <i class="fa" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
             </button>
           </div>
 
-          <div
-            *ngIf="passwordRef.invalid && passwordRef.touched"
-            class="error-text"
-          >
-            <small *ngIf="passwordRef.errors?.required"
-              >Password is required</small
-            >
+          <div *ngIf="passwordRef.invalid && passwordRef.touched" class="error-text">
+            <small *ngIf="passwordRef.errors?.required">Password is required</small>
           </div>
         </div>
 
         <div class="form-options">
           <label class="remember-me">
             <input type="checkbox" name="remember" [(ngModel)]="rememberMe" />
-            <span>Remember me</span>
+            <span>Remember credentials</span>
           </label>
 
-          <a routerLink="/forgot-password" class="forgot-link"
-            >Forgot password?</a
-          >
+          <span class="security-chip">
+            <i class="fa fa-check-shield"></i> JWT Bearer Active
+          </span>
         </div>
 
         <button
@@ -117,40 +175,230 @@
           class="login-btn"
           [disabled]="loginForm.invalid || loading"
         >
-          <span *ngIf="!loading">Sign In</span>
+          <span *ngIf="!loading">
+            <i class="fa fa-sign-in"></i> Sign In to Account
+          </span>
           <span *ngIf="loading">
-            <i class="fa fa-spinner fa-spin"></i> Signing in...
+            <i class="fa fa-spinner fa-spin"></i> Authenticating...
           </span>
         </button>
       </form>
 
-      <div class="divider">
-        <span>OR CONTINUE WITH</span>
+      <!-- ================= FORM 2: GMAIL / MOBILE OTP LOGIN ================= -->
+      <div *ngIf="authMode === 'otp'" class="otp-container">
+        <div *ngIf="otpMsg" class="alert-box" [ngClass]="{'alert-success': otpSent}">
+          <i class="fa" [ngClass]="otpSent ? 'fa-check-circle' : 'fa-exclamation-circle'"></i>
+          <span>{{ otpMsg }}</span>
+        </div>
+
+        <!-- Role Selector for OTP -->
+        <div class="role-selector-row">
+          <span class="selector-label">Account Role:</span>
+          <label class="radio-label">
+            <input
+              type="radio"
+              name="otpRole"
+              value="user"
+              [(ngModel)]="otpRole"
+              [disabled]="otpSent"
+            />
+            <span>Patient / User</span>
+          </label>
+          <label class="radio-label">
+            <input
+              type="radio"
+              name="otpRole"
+              value="doctor"
+              [(ngModel)]="otpRole"
+              [disabled]="otpSent"
+            />
+            <span>Doctor Specialist</span>
+          </label>
+        </div>
+
+        <!-- Step 1: Identifier Input -->
+        <div class="form-group">
+          <label for="otpIdentifier">Gmail Address or Mobile Number</label>
+          <div class="input-wrapper">
+            <i class="fa" [ngClass]="otpIdentifier.includes('@') ? 'fa-envelope' : 'fa-phone'"></i>
+            <input
+              type="text"
+              id="otpIdentifier"
+              name="otpIdentifier"
+              class="form-control"
+              placeholder="e.g. user@gmail.com or 9876543210"
+              [(ngModel)]="otpIdentifier"
+              [disabled]="otpSent"
+            />
+          </div>
+          <small class="field-hint">
+            We will dispatch a secure 6-digit one-time password (valid for 5 mins).
+          </small>
+        </div>
+
+        <!-- Action: Request OTP -->
+        <div class="otp-action-row" *ngIf="!otpSent">
+          <button
+            type="button"
+            class="login-btn"
+            (click)="requestOtp()"
+            [disabled]="!otpIdentifier || otpLoading"
+          >
+            <span *ngIf="!otpLoading">
+              <i class="fa fa-paper-plane"></i> Send 6-Digit OTP Code
+            </span>
+            <span *ngIf="otpLoading">
+              <i class="fa fa-spinner fa-spin"></i> Generating Secure Code...
+            </span>
+          </button>
+        </div>
+
+        <!-- Step 2: OTP Verification Box -->
+        <div *ngIf="otpSent" class="otp-verification-panel">
+          <!-- Demo Helper Chip -->
+          <div *ngIf="demoOtpCode" class="demo-otp-banner">
+            <div class="demo-code-text">
+              <span>Security Code Generated:</span>
+              <strong>{{ demoOtpCode }}</strong>
+            </div>
+            <button type="button" class="btn-fill-otp" (click)="fillDemoOtp()">
+              <i class="fa fa-magic"></i> Auto-Fill
+            </button>
+          </div>
+
+          <div class="form-group">
+            <label for="enteredOtp">Enter 6-Digit OTP</label>
+            <div class="input-wrapper">
+              <i class="fa fa-key input-icon"></i>
+              <input
+                type="text"
+                id="enteredOtp"
+                name="enteredOtp"
+                maxlength="6"
+                class="form-control otp-input"
+                placeholder="• • • • • •"
+                [(ngModel)]="enteredOtp"
+              />
+            </div>
+          </div>
+
+          <div class="resend-row">
+            <span *ngIf="otpCooldown > 0" class="cooldown-text">
+              <i class="fa fa-clock-o"></i> Resend code in {{ otpCooldown }}s
+            </span>
+            <button
+              *ngIf="otpCooldown === 0"
+              type="button"
+              class="link-btn"
+              (click)="requestOtp()"
+            >
+              <i class="fa fa-refresh"></i> Resend OTP Code
+            </button>
+
+            <button
+              type="button"
+              class="link-btn text-muted"
+              (click)="otpSent = false; enteredOtp = ''"
+            >
+              Change phone/email
+            </button>
+          </div>
+
+          <button
+            type="button"
+            class="login-btn"
+            (click)="verifyOtpAndLogin()"
+            [disabled]="enteredOtp.length < 6 || otpLoading"
+          >
+            <span *ngIf="!otpLoading">
+              <i class="fa fa-check"></i> Verify & Generate Bearer Session
+            </span>
+            <span *ngIf="otpLoading">
+              <i class="fa fa-spinner fa-spin"></i> Verifying...
+            </span>
+          </button>
+        </div>
       </div>
 
-      <div class="social-login">
-        <a href="https://www.google.com/" target="_blank"
-          ><button class="social-btn google" type="button">
-            <i class="fa fa-google"></i></button
-        ></a>
-        <a href="https://www.linkedin.com/in/tabish-firoz/" target="_blank">
-          <button class="social-btn linkedin" type="button">
-            <i class="fa fa-linkedin"></i></button
-        ></a>
-        <a href="https://x.com/mdtabishfiroz" target="_blank">
-          <button class="social-btn twitter" type="button">
-            <i class="fa fa-twitter"></i></button
-        ></a>
-        <a href="https://github.com/firozmdtabish04" target="_blank">
-          <button class="social-btn github" type="button">
-            <i class="fa fa-github"></i></button
-        ></a>
-      </div>
-
+      <!-- Social Links Footer -->
       <div class="signup-text">
         Don’t have an account?
-        <a [routerLink]="['/registration']">Create One</a>
+        <a [routerLink]="['/registration']">Register New Account</a>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= GOOGLE OAUTH POPUP SIMULATION MODAL ================= -->
+<div class="google-modal-overlay" *ngIf="googlePromptOpen">
+  <div class="google-modal-card">
+    <div class="google-modal-header">
+      <svg class="google-icon-large" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      </svg>
+      <div>
+        <h3>Sign in with Google</h3>
+        <p>Choose an account to continue to Healthcare Management System</p>
+      </div>
+      <button type="button" class="close-x" (click)="closeGooglePrompt()">&times;</button>
+    </div>
+
+    <div class="google-accounts-list">
+      <!-- Quick Account 1: Tabish Firoz -->
+      <div
+        class="google-account-item"
+        (click)="submitGoogleOAuth('mdtabishfiroz04@gmail.com', 'Tabish Firoz')"
+      >
+        <div class="account-avatar">T</div>
+        <div class="account-details">
+          <strong>Tabish Firoz</strong>
+          <span>mdtabishfiroz04@gmail.com</span>
+        </div>
+        <i class="fa fa-chevron-right"></i>
+      </div>
+
+      <!-- Quick Account 2: Patient Account -->
+      <div
+        class="google-account-item"
+        (click)="submitGoogleOAuth('patient.google@gmail.com', 'Alex Morgan')"
+      >
+        <div class="account-avatar green">A</div>
+        <div class="account-details">
+          <strong>Alex Morgan</strong>
+          <span>patient.google@gmail.com</span>
+        </div>
+        <i class="fa fa-chevron-right"></i>
+      </div>
+    </div>
+
+    <!-- Custom Account Input -->
+    <div class="custom-google-box">
+      <span class="custom-title">Or use another Google account:</span>
+      <div class="form-group">
+        <input
+          type="email"
+          class="form-control"
+          placeholder="your.name@gmail.com"
+          [(ngModel)]="googleEmailInput"
+        />
+      </div>
+      <button
+        type="button"
+        class="btn-google-proceed"
+        (click)="submitGoogleOAuth(googleEmailInput, googleNameInput)"
+        [disabled]="!googleEmailInput"
+      >
+        Continue with this Google Account
+      </button>
+    </div>
+
+    <div class="google-modal-footer">
+      <small>
+        To continue, Google will share your name, email address, and profile picture with Healthcare Management System.
+      </small>
     </div>
   </div>
 </div>

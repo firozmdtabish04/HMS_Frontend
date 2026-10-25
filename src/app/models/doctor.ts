@@ -4,7 +4,7 @@ export class Doctor
     doctorname : string = '';
     email : string = '';
     gender : string = '';
-    mobile : String = '';
+    mobile : string = '';
     experience : string = '';
     address : string = '';
     specialization : string = '';

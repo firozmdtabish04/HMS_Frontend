@@ -5,13 +5,27 @@
 
 <div class="homepage">
   <!-- TOP INFO BAR -->
+
   <div class="topbar">
     <div class="topbar-left">
       <span><i class="fa fa-phone"></i> Emergency: +91 8102946894</span>
       <span><i class="fa fa-envelope"></i> mdtabishfiroz04@gmail.com</span>
     </div>
+
     <div class="topbar-right">
-      <span><i class="fa fa-clock-o"></i> Open 24/7 for Emergency Services</span>
+      <span
+        ><i class="fa fa-clock-o"></i> Open 24/7 for Emergency Services</span
+      >
+      <span>
+        <i class="fa fa-globe"></i>
+        <a
+          href="https://medical-store-mern-client-52k3.vercel.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Visit Medical Store
+        </a>
+      </span>
     </div>
   </div>
 
@@ -28,15 +42,27 @@
 
     <div class="menu" [class.open]="isMenuOpen">
       <button class="nav-btn" (click)="scrollToSection('home')">Home</button>
-      <button class="nav-btn" (click)="scrollToSection('portals')">Portals</button>
-      <button class="nav-btn" (click)="scrollToSection('departments')">Departments</button>
-      <button class="nav-btn" (click)="scrollToSection('doctors')">Doctors</button>
-      <button class="nav-btn" (click)="scrollToSection('services')">Services</button>
-      <button class="nav-btn" (click)="scrollToSection('workflow')">Process</button>
+      <button class="nav-btn" (click)="scrollToSection('portals')">
+        Portals
+      </button>
+      <button class="nav-btn" (click)="scrollToSection('departments')">
+        Departments
+      </button>
+      <button class="nav-btn" (click)="scrollToSection('doctors')">
+        Doctors
+      </button>
+      <button class="nav-btn" (click)="scrollToSection('services')">
+        Services
+      </button>
+      <button class="nav-btn" (click)="scrollToSection('workflow')">
+        Process
+      </button>
       <button class="nav-btn" (click)="scrollToSection('faq')">FAQ</button>
       <button class="nav-btn" routerLink="/about">About</button>
       <button class="nav-btn" routerLink="/login">Login</button>
-      <button class="register-btn" routerLink="/registration">Create Account</button>
+      <button class="register-btn" routerLink="/registration">
+        Create Account
+      </button>
     </div>
   </nav>
 
@@ -47,9 +73,7 @@
         <i class="fa fa-shield"></i> Trusted Enterprise Healthcare Platform
       </span>
 
-      <h1>
-        Modern <span>Hospital Management</span> for Better Care
-      </h1>
+      <h1>Modern <span>Hospital Management</span> for Better Care</h1>
 
       <p>
         Transform hospital operations with an enterprise-grade digital platform
@@ -77,7 +101,7 @@
     <div class="hero-right">
       <img src="assets/img/hospital.png" alt="Hospital" />
 
-      <div class="hero-card card1">
+      <div class="card1 hero-card">
         <i class="fa fa-heartbeat"></i>
         <div>
           <h4>Advanced Care</h4>
@@ -85,7 +109,7 @@
         </div>
       </div>
 
-      <div class="hero-card card2">
+      <div class="card2 hero-card">
         <i class="fa fa-user-md"></i>
         <div>
           <h4>Expert Doctors</h4>
@@ -93,7 +117,7 @@
         </div>
       </div>
 
-      <div class="hero-card card3">
+      <div class="card3 hero-card">
         <i class="fa fa-ambulance"></i>
         <div>
           <h4>24/7 Emergency</h4>
@@ -136,7 +160,11 @@
     </div>
 
     <div class="portal-container">
-      <div class="portal-card" *ngFor="let portal of portals" (click)="navigateTo(portal.route)">
+      <div
+        class="portal-card"
+        *ngFor="let portal of portals"
+        (click)="navigateTo(portal.route)"
+      >
         <div class="portal-badge">{{ portal.badge }}</div>
 
         <div class="portal-icon">
@@ -161,11 +189,18 @@
     <div class="section-header">
       <span class="section-badge">Specialities</span>
       <h2>Clinical Departments</h2>
-      <p>Browse our active medical divisions and schedule your appointment with verified specialists.</p>
+      <p>
+        Browse our active medical divisions and schedule your appointment with
+        verified specialists.
+      </p>
     </div>
 
     <div class="departments-chips-grid">
-      <div class="dept-chip" *ngFor="let dept of (departments$ | async)" routerLink="/checkslots">
+      <div
+        class="dept-chip"
+        *ngFor="let dept of departments$ | async"
+        routerLink="/checkslots"
+      >
         <i class="fa fa-stethoscope"></i>
         <span>{{ dept }}</span>
         <small class="chip-action">View Slots &rarr;</small>
@@ -178,22 +213,36 @@
     <div class="section-header">
       <span class="section-badge">Qualified Staff</span>
       <h2>Our Medical Experts</h2>
-      <p>Consult with certified specialists dedicated to patient care and clinical excellence.</p>
+      <p>
+        Consult with certified specialists dedicated to patient care and
+        clinical excellence.
+      </p>
     </div>
 
     <ng-container *ngIf="approvedDoctors$ | async as doctors">
-      <div class="doctors-cards-grid" *ngIf="doctors.length > 0; else noDoctorsTpl">
+      <div
+        class="doctors-cards-grid"
+        *ngIf="doctors.length > 0; else noDoctorsTpl"
+      >
         <div class="doctor-highlight-card" *ngFor="let doc of doctors">
           <div class="doctor-avatar-box">
             <img [src]="getDoctorImage(doc.gender)" [alt]="doc.doctorname" />
-            <span class="verified-badge" title="Verified Specialist"><i class="fa fa-check-circle"></i> Verified</span>
+            <span class="verified-badge" title="Verified Specialist"
+              ><i class="fa fa-check-circle"></i> Verified</span
+            >
           </div>
           <div class="doctor-details">
             <h3>Dr. {{ doc.doctorname }}</h3>
             <p class="specialization-pill">{{ doc.specialization }}</p>
             <div class="doctor-meta">
-              <span><i class="fa fa-briefcase"></i> {{ doc.experience }} Yrs Experience</span>
-              <span><i class="fa fa-hospital-o"></i> {{ doc.previoushospital || 'AIIMS' }}</span>
+              <span
+                ><i class="fa fa-briefcase"></i> {{ doc.experience }} Yrs
+                Experience</span
+              >
+              <span
+                ><i class="fa fa-hospital-o"></i>
+                {{ doc.previoushospital || "AIIMS" }}</span
+              >
             </div>
             <button class="book-doc-btn" routerLink="/bookappointment">
               <i class="fa fa-calendar-check-o"></i> Book Consultation
@@ -204,8 +253,13 @@
       <ng-template #noDoctorsTpl>
         <div class="empty-doctors-hint">
           <i class="fa fa-user-md"></i>
-          <p>Medical experts are currently updating their schedule. Check back shortly!</p>
-          <button class="btn-primary" routerLink="/doctorlist">View Doctor Directory</button>
+          <p>
+            Medical experts are currently updating their schedule. Check back
+            shortly!
+          </p>
+          <button class="btn-primary" routerLink="/doctorlist">
+            View Doctor Directory
+          </button>
         </div>
       </ng-template>
     </ng-container>
@@ -217,7 +271,8 @@
       <span class="section-badge">Core Features</span>
       <h2>Medical & Digital Services</h2>
       <p>
-        A complete system built to improve hospital administration and patient experience.
+        A complete system built to improve hospital administration and patient
+        experience.
       </p>
     </div>
 
@@ -238,15 +293,23 @@
       <span class="section-badge">Why Us</span>
       <h2>Built for Modern Healthcare Institutions</h2>
       <p>
-        Improve clinical operations, patient communication and digital healthcare
-        delivery through one robust and scalable hospital platform.
+        Improve clinical operations, patient communication and digital
+        healthcare delivery through one robust and scalable hospital platform.
       </p>
 
       <div class="why-list">
-        <div class="why-item"><i class="fa fa-check-circle"></i> Centralized hospital operations</div>
-        <div class="why-item"><i class="fa fa-check-circle"></i> Role-based workflow management</div>
-        <div class="why-item"><i class="fa fa-check-circle"></i> Improved patient experience</div>
-        <div class="why-item"><i class="fa fa-check-circle"></i> Scalable enterprise architecture</div>
+        <div class="why-item">
+          <i class="fa fa-check-circle"></i> Centralized hospital operations
+        </div>
+        <div class="why-item">
+          <i class="fa fa-check-circle"></i> Role-based workflow management
+        </div>
+        <div class="why-item">
+          <i class="fa fa-check-circle"></i> Improved patient experience
+        </div>
+        <div class="why-item">
+          <i class="fa fa-check-circle"></i> Scalable enterprise architecture
+        </div>
       </div>
     </div>
 
@@ -254,13 +317,19 @@
       <div class="why-card">
         <i class="fa fa-hospital-o"></i>
         <h3>Operational Excellence</h3>
-        <p>Manage appointments, departments, doctors, records and administration efficiently.</p>
+        <p>
+          Manage appointments, departments, doctors, records and administration
+          efficiently.
+        </p>
       </div>
 
       <div class="why-card">
         <i class="fa fa-lock"></i>
         <h3>Secure by Design</h3>
-        <p>Support controlled data access and secure workflows for healthcare operations.</p>
+        <p>
+          Support controlled data access and secure workflows for healthcare
+          operations.
+        </p>
       </div>
     </div>
   </section>
@@ -271,7 +340,8 @@
       <span class="section-badge">How It Works</span>
       <h2>Simple Digital Care Process</h2>
       <p>
-        A structured workflow to make healthcare faster, easier and more organized.
+        A structured workflow to make healthcare faster, easier and more
+        organized.
       </p>
     </div>
 
@@ -349,8 +419,8 @@
     <div class="cta-box">
       <h2>Start Your Smart Healthcare Experience</h2>
       <p>
-        Join a modern digital healthcare ecosystem for faster access, better care
-        and improved hospital management.
+        Join a modern digital healthcare ecosystem for faster access, better
+        care and improved hospital management.
       </p>
 
       <div class="cta-buttons">
