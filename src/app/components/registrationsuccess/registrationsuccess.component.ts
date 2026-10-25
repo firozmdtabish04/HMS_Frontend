@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
+  standalone: false,
   selector: 'app-registrationsuccess',
   templateUrl: './registrationsuccess.component.html',
   styleUrls: ['./registrationsuccess.component.css']

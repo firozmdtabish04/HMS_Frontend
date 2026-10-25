@@ -7,6 +7,7 @@ import { DoctorService } from 'src/app/services/doctor.service';
 import { UserService } from 'src/app/services/user.service';
 
 @Component({
+  standalone: false,
   selector: 'app-addprescription',
   templateUrl: './addprescription.component.html',
   styleUrls: ['./addprescription.component.css']

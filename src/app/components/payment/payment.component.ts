@@ -21,6 +21,7 @@ interface PaymentRecord {
 }
 
 @Component({
+  standalone: false,
   selector: 'app-payment',
   templateUrl: './payment.component.html',
   styleUrls: ['./payment.component.css']

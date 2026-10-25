@@ -5,6 +5,7 @@ import { User } from 'src/app/models/user';
 import { UserService } from 'src/app/services/user.service';
 
 @Component({
+  standalone: false,
   selector: 'app-userprofile',
   templateUrl: './userprofile.component.html',
   styleUrls: ['./userprofile.component.css']

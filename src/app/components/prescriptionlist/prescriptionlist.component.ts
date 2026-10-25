@@ -4,6 +4,7 @@ import { Prescription } from 'src/app/models/prescription';
 import { UserService } from 'src/app/services/user.service';
 
 @Component({
+  standalone: false,
   selector: 'app-prescriptionlist',
   templateUrl: './prescriptionlist.component.html',
   styleUrls: ['./prescriptionlist.component.css']

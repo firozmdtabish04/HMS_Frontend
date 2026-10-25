@@ -19,6 +19,7 @@ interface DashboardStat {
 }
 
 @Component({
+  standalone: false,
   selector: 'app-userdashboard',
   templateUrl: './userdashboard.component.html',
   styleUrls: ['./userdashboard.component.css']

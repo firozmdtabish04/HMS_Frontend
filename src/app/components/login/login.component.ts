@@ -5,6 +5,7 @@ import { User } from 'src/app/models/user';
 import { LoginService } from 'src/app/services/login.service';
 
 @Component({
+  standalone: false,
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']

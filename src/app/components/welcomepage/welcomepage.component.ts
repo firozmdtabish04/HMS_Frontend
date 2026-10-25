@@ -43,6 +43,7 @@ interface ProcessStep {
 }
 
 @Component({
+  standalone: false,
   selector: 'app-welcomepage',
   templateUrl: './welcomepage.component.html',
   styleUrls: ['./welcomepage.component.css']

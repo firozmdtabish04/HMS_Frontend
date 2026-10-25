@@ -57,6 +57,7 @@ interface ShortcutItem {
 }
 
 @Component({
+  standalone: false,
   selector: 'app-admindashboard',
   templateUrl: './admindashboard.component.html',
   styleUrls: ['./admindashboard.component.css'],

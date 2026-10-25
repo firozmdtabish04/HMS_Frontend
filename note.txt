@@ -1,11 +1,10 @@
-nvm install 16.20.2
-nvm use 16.20.2
-Remove-Item node_modules -Recurse -Force
-Remove-Item package-lock.json
-npm install
-npx ng version
-npm install -g @angular/cli@12
-ng s -o
-npx ng serve -o
+# Angular 22 Project Notes
+# Running on Node 24+ and latest Angular 22
 
+# Install dependencies:
+npm install
+
+# Run development server:
+npm start
+# or:
 ng serve

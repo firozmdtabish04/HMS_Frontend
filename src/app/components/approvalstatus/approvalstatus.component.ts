@@ -5,6 +5,7 @@ import { Doctor } from 'src/app/models/doctor';
 import { DoctorService } from 'src/app/services/doctor.service';
 
 @Component({
+  standalone: false,
   selector: 'app-approvalstatus',
   templateUrl: './approvalstatus.component.html',
   styleUrls: ['./approvalstatus.component.css']

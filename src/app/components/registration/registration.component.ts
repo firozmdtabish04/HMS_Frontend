@@ -6,6 +6,7 @@ import { DoctorService } from 'src/app/services/doctor.service';
 import { RegistrationService } from 'src/app/services/registration.service';
 
 @Component({
+  standalone: false,
   selector: 'app-registration',
   templateUrl: './registration.component.html',
   styleUrls: ['./registration.component.css']

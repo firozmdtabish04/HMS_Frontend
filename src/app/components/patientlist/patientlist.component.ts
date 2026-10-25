@@ -5,6 +5,7 @@ import { Slots } from 'src/app/models/slots';
 import { DoctorService } from 'src/app/services/doctor.service';
 
 @Component({
+  standalone: false,
   selector: 'app-patientlist',
   templateUrl: './patientlist.component.html',
   styleUrls: ['./patientlist.component.css']

@@ -5,6 +5,7 @@ import { Doctor } from 'src/app/models/doctor';
 import { DoctorService } from 'src/app/services/doctor.service';
 
 @Component({
+  standalone: false,
   selector: 'app-doctorprofile',
   templateUrl: './doctorprofile.component.html',
   styleUrls: ['./doctorprofile.component.css']

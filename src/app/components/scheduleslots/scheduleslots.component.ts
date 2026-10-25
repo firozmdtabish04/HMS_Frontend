@@ -5,6 +5,7 @@ import { DoctorService } from 'src/app/services/doctor.service';
 import Swal from 'sweetalert2';
 
 @Component({
+  standalone: false,
   selector: 'app-scheduleslots',
   templateUrl: './scheduleslots.component.html',
   styleUrls: ['./scheduleslots.component.css']

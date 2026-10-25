@@ -33,6 +33,7 @@ interface AppointmentItem {
 }
 
 @Component({
+  standalone: false,
   selector: 'app-doctordashboard',
   templateUrl: './doctordashboard.component.html',
   styleUrls: ['./doctordashboard.component.css']
