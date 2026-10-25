@@ -1,4 +1,10 @@
 {
   "buildCommand": "npm run build:prod",
-  "outputDirectory": "dist/HealthCareManagement"
+  "outputDirectory": "dist/HealthCareManagement/browser",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
