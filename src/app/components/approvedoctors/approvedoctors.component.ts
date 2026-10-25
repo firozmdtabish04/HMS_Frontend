@@ -24,7 +24,7 @@ export class ApprovedoctorsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loggedUser = sessionStorage.getItem('loggedUser') || '';
-    this.currRole = sessionStorage.getItem('ROLE') || '';
+    this.currRole = (sessionStorage.getItem('ROLE') || '').toLowerCase();
     this.loadDoctors();
   }
 

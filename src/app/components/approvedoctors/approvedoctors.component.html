@@ -150,7 +150,7 @@
               <td>
                 <!-- ADMIN VIEW -->
                 <ng-container *ngIf="currRole === 'admin'">
-                  <ng-container *ngIf="doctor.status === 'false'; else showStatus">
+                  <ng-container *ngIf="doctor.status === 'false' || !doctor.status || doctor.status === 'pending'; else showStatus">
                     <div class="action-group">
                       <button
                         class="accepted action-btn"
@@ -187,7 +187,7 @@
 
                 <!-- DOCTOR VIEW -->
                 <ng-container
-                  *ngIf="currRole === 'DOCTOR' && doctor.email === loggedUser"
+                  *ngIf="(currRole === 'doctor' || currRole === 'DOCTOR') && doctor.email === loggedUser"
                 >
                   <span class="status" [ngClass]="getStatusClass(doctor.status)">
                     <i
