@@ -29,6 +29,8 @@
     <div class="menu" [class.open]="isMenuOpen">
       <button class="nav-btn" (click)="scrollToSection('home')">Home</button>
       <button class="nav-btn" (click)="scrollToSection('portals')">Portals</button>
+      <button class="nav-btn" (click)="scrollToSection('departments')">Departments</button>
+      <button class="nav-btn" (click)="scrollToSection('doctors')">Doctors</button>
       <button class="nav-btn" (click)="scrollToSection('services')">Services</button>
       <button class="nav-btn" (click)="scrollToSection('workflow')">Process</button>
       <button class="nav-btn" (click)="scrollToSection('faq')">FAQ</button>
@@ -101,12 +103,24 @@
     </div>
   </section>
 
-  <!-- STATS -->
+  <!-- DYNAMIC STATS -->
   <section class="stats-section">
     <div class="stats-grid">
-      <div class="stat-card" *ngFor="let stat of stats">
-        <h2>{{ stat.value }}</h2>
-        <p>{{ stat.label }}</p>
+      <div class="stat-card">
+        <h2>{{ (patientsCount$ | async) ?? 0 }}+</h2>
+        <p>Patients Served</p>
+      </div>
+      <div class="stat-card">
+        <h2>{{ (doctorsCount$ | async) ?? 0 }}+</h2>
+        <p>Medical Experts</p>
+      </div>
+      <div class="stat-card">
+        <h2>{{ (departmentsCount$ | async) ?? 0 }}+</h2>
+        <p>Clinical Departments</p>
+      </div>
+      <div class="stat-card">
+        <h2>{{ (slotsCount$ | async) ?? 0 }}+</h2>
+        <p>Available Slots</p>
       </div>
     </div>
   </section>
@@ -140,6 +154,61 @@
         </button>
       </div>
     </div>
+  </section>
+
+  <!-- DYNAMIC CLINICAL DEPARTMENTS -->
+  <section class="departments-preview-section" id="departments">
+    <div class="section-header">
+      <span class="section-badge">Specialities</span>
+      <h2>Clinical Departments</h2>
+      <p>Browse our active medical divisions and schedule your appointment with verified specialists.</p>
+    </div>
+
+    <div class="departments-chips-grid">
+      <div class="dept-chip" *ngFor="let dept of (departments$ | async)" routerLink="/checkslots">
+        <i class="fa fa-stethoscope"></i>
+        <span>{{ dept }}</span>
+        <small class="chip-action">View Slots &rarr;</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- DYNAMIC MEDICAL EXPERTS -->
+  <section class="doctors-preview-section" id="doctors">
+    <div class="section-header">
+      <span class="section-badge">Qualified Staff</span>
+      <h2>Our Medical Experts</h2>
+      <p>Consult with certified specialists dedicated to patient care and clinical excellence.</p>
+    </div>
+
+    <ng-container *ngIf="approvedDoctors$ | async as doctors">
+      <div class="doctors-cards-grid" *ngIf="doctors.length > 0; else noDoctorsTpl">
+        <div class="doctor-highlight-card" *ngFor="let doc of doctors">
+          <div class="doctor-avatar-box">
+            <img [src]="getDoctorImage(doc.gender)" [alt]="doc.doctorname" />
+            <span class="verified-badge" title="Verified Specialist"><i class="fa fa-check-circle"></i> Verified</span>
+          </div>
+          <div class="doctor-details">
+            <h3>Dr. {{ doc.doctorname }}</h3>
+            <p class="specialization-pill">{{ doc.specialization }}</p>
+            <div class="doctor-meta">
+              <span><i class="fa fa-briefcase"></i> {{ doc.experience }} Yrs Experience</span>
+              <span><i class="fa fa-hospital-o"></i> {{ doc.previoushospital || 'AIIMS' }}</span>
+            </div>
+            <button class="book-doc-btn" routerLink="/bookappointment">
+              <i class="fa fa-calendar-check-o"></i> Book Consultation
+            </button>
+          </div>
+        </div>
+      </div>
+      <ng-template #noDoctorsTpl>
+        <div class="empty-doctors-hint">
+          <i class="fa fa-user-md"></i>
+          <p>Medical experts are currently updating their schedule. Check back shortly!</p>
+          <button class="btn-primary" routerLink="/doctorlist">View Doctor Directory</button>
+        </div>
+      </ng-template>
+    </ng-container>
   </section>
 
   <!-- SERVICES -->
@@ -207,15 +276,13 @@
     </div>
 
     <div class="workflow-grid">
-      <div class="workflow-card" *ngFor="let item of processSteps">
-        <div class="workflow-top">
-          <span class="step">{{ item.step }}</span>
-          <div class="workflow-icon">
-            <i [class]="item.icon"></i>
-          </div>
+      <div class="workflow-step" *ngFor="let step of processSteps">
+        <div class="step-badge">{{ step.step }}</div>
+        <div class="step-icon">
+          <i [class]="step.icon"></i>
         </div>
-        <h3>{{ item.title }}</h3>
-        <p>{{ item.description }}</p>
+        <h3>{{ step.title }}</h3>
+        <p>{{ step.description }}</p>
       </div>
     </div>
   </section>
@@ -223,19 +290,30 @@
   <!-- TESTIMONIALS -->
   <section class="testimonial-section">
     <div class="section-header">
-      <span class="section-badge">Testimonials</span>
-      <h2>What People Say</h2>
-      <p>
-        Trusted by patients, doctors and healthcare administrators.
-      </p>
+      <span class="section-badge">Feedback</span>
+      <h2>Trusted by Patients & Professionals</h2>
+      <p>Here is what people say about their experience with the system.</p>
     </div>
 
     <div class="testimonial-grid">
       <div class="testimonial-card" *ngFor="let item of testimonials">
-        <img [src]="item.image" [alt]="item.name" />
-        <p class="message">“{{ item.message }}”</p>
-        <h3>{{ item.name }}</h3>
-        <span>{{ item.role }}</span>
+        <div class="stars">
+          <i class="fa fa-star"></i>
+          <i class="fa fa-star"></i>
+          <i class="fa fa-star"></i>
+          <i class="fa fa-star"></i>
+          <i class="fa fa-star"></i>
+        </div>
+
+        <p class="quote">“{{ item.message }}”</p>
+
+        <div class="author-box">
+          <img [src]="item.image" [alt]="item.name" />
+          <div>
+            <h4>{{ item.name }}</h4>
+            <span>{{ item.role }}</span>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -245,33 +323,24 @@
     <div class="section-header">
       <span class="section-badge">FAQ</span>
       <h2>Frequently Asked Questions</h2>
-      <p>
-        Answers to common questions about the hospital management system.
-      </p>
+      <p>Find quick answers to common questions about the platform.</p>
     </div>
 
     <div class="faq-container">
-      <div class="faq-item" *ngFor="let faq of faqs; let i = index">
-        <div class="faq-question" (click)="toggleFaq(i)">
-          <h3>{{ faq.question }}</h3>
+      <div
+        class="faq-item"
+        *ngFor="let faq of faqs; let i = index"
+        [class.open]="faq.isOpen"
+      >
+        <button class="faq-question" (click)="toggleFaq(i)">
+          <span>{{ faq.question }}</span>
           <i class="fa" [ngClass]="faq.isOpen ? 'fa-minus' : 'fa-plus'"></i>
-        </div>
+        </button>
 
         <div class="faq-answer" *ngIf="faq.isOpen">
           <p>{{ faq.answer }}</p>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- EMERGENCY -->
-  <section class="emergency-strip">
-    <div class="emergency-content">
-      <div>
-        <h2><i class="fa fa-ambulance"></i> Emergency Support Available 24/7</h2>
-        <p>Immediate medical assistance and emergency healthcare coordination.</p>
-      </div>
-      <button class="emergency-btn">Call Now</button>
     </div>
   </section>
 

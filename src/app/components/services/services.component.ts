@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, map, shareReplay, startWith } from 'rxjs/operators';
 import { UserService } from 'src/app/services/user.service';
+import { DoctorService } from 'src/app/services/doctor.service';
 
 interface ServiceItem {
   title: string;
@@ -57,7 +58,8 @@ export class ServicesComponent implements AfterViewInit, OnDestroy, OnInit {
 
   constructor(
     private router: Router,
-    private userService: UserService
+    private userService: UserService,
+    private doctorService: DoctorService
   ) { }
 
   observer?: IntersectionObserver;
@@ -77,6 +79,7 @@ export class ServicesComponent implements AfterViewInit, OnDestroy, OnInit {
   doctorsCount$!: Observable<number>;
   slotsCount$!: Observable<number>;
   patientsCount$!: Observable<number>;
+  departmentsCount$!: Observable<string | number>;
 
   hospitalStats: HospitalStat[] = [];
 
@@ -279,13 +282,19 @@ export class ServicesComponent implements AfterViewInit, OnDestroy, OnInit {
     this.doctorsCount$ = this.toCount(this.userService.getTotalDoctors());
     this.slotsCount$ = this.toCount(this.userService.getTotalSlots());
     this.patientsCount$ = this.toCount(this.userService.getTotalPatients());
+    this.departmentsCount$ = this.doctorService.getSlotListWithUniqueSpecializations().pipe(
+      map(deps => deps && deps.length > 0 ? `${deps.length}+` : '8+'),
+      startWith('8+'),
+      catchError(() => of('8+')),
+      shareReplay(1)
+    );
   }
 
   private initializeHospitalStats(): void {
     this.hospitalStats = [
       {
         label: 'Departments',
-        value$: of('22+'),
+        value$: this.departmentsCount$,
         icon: 'fa fa-hospital-o'
       },
       {

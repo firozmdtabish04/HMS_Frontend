@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Observable, combineLatest, of } from 'rxjs';
 import { catchError, map, shareReplay, startWith } from 'rxjs/operators';
 import { UserService } from 'src/app/services/user.service';
+import { DoctorService } from 'src/app/services/doctor.service';
 
 interface MenuItem {
   label: string;
@@ -91,7 +92,10 @@ export class AdmindashboardComponent implements OnInit {
   miniStats: MiniStat[] = [];
   shortcuts: ShortcutItem[] = [];
 
-  constructor(private readonly userService: UserService) { }
+  constructor(
+    private readonly userService: UserService,
+    private readonly doctorService: DoctorService
+  ) { }
 
   ngOnInit(): void {
     this.loadSessionValues();
@@ -209,6 +213,20 @@ export class AdmindashboardComponent implements OnInit {
   }
 
   private initializeRecentActivity(): void {
+    this.doctorService.getDoctorList().subscribe({
+      next: (doctors) => {
+        if (doctors && doctors.length > 0) {
+          this.recentActivities = doctors.slice(0, 5).map(doc => ({
+            title: `Doctor: Dr. ${doc.doctorname}`,
+            subtitle: `${doc.specialization || 'Clinical Specialist'} • ${doc.experience || '2+'} Yrs Exp • ${doc.email}`,
+            icon: 'fa fa-user-md',
+            badge: doc.status?.toLowerCase() === 'accept' ? 'Approved' : 'Pending',
+            badgeClass: doc.status?.toLowerCase() === 'accept' ? 'badge-success' : 'badge-warning'
+          }));
+        }
+      },
+      error: () => {}
+    });
     this.recentActivities = [
       {
         title: 'Doctor management module',
@@ -339,8 +357,8 @@ export class AdmindashboardComponent implements OnInit {
       shareReplay(1)
     );
 
-    this.pendingApprovalsCount$ = this.doctorsCount$.pipe(
-      map((count) => Math.max(0, Math.floor(count * 0.15))),
+    this.pendingApprovalsCount$ = this.doctorService.getDoctorList().pipe(
+      map((doctors) => (doctors || []).filter((d) => d.status !== 'accept').length),
       startWith(0),
       shareReplay(1)
     );

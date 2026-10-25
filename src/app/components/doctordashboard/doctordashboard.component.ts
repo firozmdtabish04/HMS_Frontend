@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
+import { DoctorService } from 'src/app/services/doctor.service';
 import { UserService } from 'src/app/services/user.service';
 
 interface QuickAction {
@@ -61,12 +62,12 @@ export class DoctordashboardComponent implements OnInit {
   totalPrescriptions = 0;
   totalUsers = 0;
 
-  completionRate = 92;
-  patientSatisfaction = 96;
-  monthlyAppointments = 128;
-  activeCases = 14;
-  availableSlotsToday = 11;
-  pendingApprovals = 3;
+  completionRate = 95;
+  patientSatisfaction = 98;
+  monthlyAppointments = 0;
+  activeCases = 0;
+  availableSlotsToday = 0;
+  pendingApprovals = 0;
 
   quickActions: QuickAction[] = [
     {
@@ -107,103 +108,26 @@ export class DoctordashboardComponent implements OnInit {
     }
   ];
 
-  todaySchedule: ScheduleItem[] = [
-    {
-      time: '09:00 AM',
-      title: 'General Consultation',
-      patient: 'Rahul Sharma',
-      status: 'Confirmed'
-    },
-    {
-      time: '10:30 AM',
-      title: 'Dental Checkup',
-      patient: 'Priya Das',
-      status: 'Pending'
-    },
-    {
-      time: '12:00 PM',
-      title: 'Follow-up Visit',
-      patient: 'Amit Kumar',
-      status: 'Confirmed'
-    },
-    {
-      time: '03:00 PM',
-      title: 'Cardiology Review',
-      patient: 'Sneha Reddy',
-      status: 'Completed'
-    }
-  ];
-
-  recentActivities: ActivityItem[] = [
-    {
-      icon: 'fa-user-plus',
-      title: 'New patient registered',
-      subtitle: 'A patient profile was added successfully',
-      time: '10 mins ago'
-    },
-    {
-      icon: 'fa-calendar-check-o',
-      title: 'Appointment scheduled',
-      subtitle: 'A new consultation has been booked for today',
-      time: '25 mins ago'
-    },
-    {
-      icon: 'fa-file-text-o',
-      title: 'Prescription created',
-      subtitle: 'Prescription added for completed consultation',
-      time: '1 hour ago'
-    },
-    {
-      icon: 'fa-clock-o',
-      title: 'Slot availability updated',
-      subtitle: 'Weekly doctor schedule was updated',
-      time: '2 hours ago'
-    }
-  ];
-
-  recentAppointments: AppointmentItem[] = [
-    {
-      patientName: 'Rahul Sharma',
-      department: 'General Medicine',
-      date: '15 Mar 2026',
-      time: '09:00 AM',
-      status: 'Confirmed'
-    },
-    {
-      patientName: 'Priya Das',
-      department: 'Dental',
-      date: '15 Mar 2026',
-      time: '10:30 AM',
-      status: 'Pending'
-    },
-    {
-      patientName: 'Amit Kumar',
-      department: 'Neurology',
-      date: '15 Mar 2026',
-      time: '12:00 PM',
-      status: 'Completed'
-    },
-    {
-      patientName: 'Sneha Reddy',
-      department: 'Cardiology',
-      date: '15 Mar 2026',
-      time: '03:00 PM',
-      status: 'Confirmed'
-    }
-  ];
+  todaySchedule: ScheduleItem[] = [];
+  recentActivities: ActivityItem[] = [];
+  recentAppointments: AppointmentItem[] = [];
 
   constructor(
-    private _route: Router,
-    private _service: UserService
+    private _service: UserService,
+    private doctorService: DoctorService,
+    private _route: Router
   ) { }
 
   ngOnInit(): void {
-    this.name = sessionStorage.getItem('loggedUser') || 'Doctor';
+    const storedDoctorName = sessionStorage.getItem('doctorname');
+    const storedName = sessionStorage.getItem('name');
+    this.loggedUser = sessionStorage.getItem('loggedUser') || '';
+    this.name = storedDoctorName || storedName || this.loggedUser || 'Doctor';
     this.gender = sessionStorage.getItem('gender') || '';
-    this.loggedUser = sessionStorage.getItem('loggedUser') || 'doctor@hospital.com';
     this.currRole = sessionStorage.getItem('ROLE') || 'Doctor';
 
     this.loadDashboardStats();
+    this.loadDoctorSpecificData();
   }
 
   loadDashboardStats(): void {
@@ -214,50 +138,112 @@ export class DoctordashboardComponent implements OnInit {
     this.prescriptions$ = this._service.getTotalPrescriptions();
 
     this.patients$?.subscribe({
-      next: (data: any[]) => {
-        this.totalPatients = this.extractCount(data);
-      },
-      error: () => {
-        this.totalPatients = 0;
-      }
+      next: (data: any[]) => this.totalPatients = this.extractCount(data),
+      error: () => this.totalPatients = 0
     });
 
     this.users$?.subscribe({
-      next: (data: any[]) => {
-        this.totalUsers = this.extractCount(data);
-      },
-      error: () => {
-        this.totalUsers = 0;
-      }
+      next: (data: any[]) => this.totalUsers = this.extractCount(data),
+      error: () => this.totalUsers = 0
     });
 
     this.doctors$?.subscribe({
-      next: (data: any[]) => {
-        this.totalDoctors = this.extractCount(data);
-      },
-      error: () => {
-        this.totalDoctors = 0;
-      }
+      next: (data: any[]) => this.totalDoctors = this.extractCount(data),
+      error: () => this.totalDoctors = 0
     });
 
     this.slots$?.subscribe({
-      next: (data: any[]) => {
-        this.totalSlots = this.extractCount(data);
-        this.availableSlotsToday = this.totalSlots;
-      },
-      error: () => {
-        this.totalSlots = 0;
-      }
+      next: (data: any[]) => this.totalSlots = this.extractCount(data),
+      error: () => this.totalSlots = 0
     });
 
     this.prescriptions$?.subscribe({
-      next: (data: any[]) => {
-        this.totalPrescriptions = this.extractCount(data);
+      next: (data: any[]) => this.totalPrescriptions = this.extractCount(data),
+      error: () => this.totalPrescriptions = 0
+    });
+  }
+
+  loadDoctorSpecificData(): void {
+    if (!this.loggedUser) return;
+
+    // Load Doctor's Real Patients
+    this.doctorService.getPatientListByDoctorEmail(this.loggedUser).subscribe({
+      next: (patients: any[]) => {
+        if (patients && Array.isArray(patients) && patients.length > 0) {
+          this.monthlyAppointments = patients.length;
+          this.activeCases = patients.filter(p => p.admissionstatus === 'accept').length;
+          this.pendingApprovals = patients.filter(p => p.appointmentstatus === 'false').length;
+
+          // Populate real appointments
+          this.recentAppointments = patients.slice(0, 5).map(p => ({
+            patientName: p.patientname || 'Patient',
+            department: p.specialization || 'Clinical Care',
+            date: p.date || 'Scheduled',
+            time: p.slot || 'General Slot',
+            status: p.appointmentstatus === 'accept' ? 'Confirmed' : (p.appointmentstatus === 'reject' ? 'Completed' : 'Pending')
+          }));
+
+          // Populate real schedule
+          this.todaySchedule = patients.slice(0, 4).map(p => ({
+            time: p.slot || 'Scheduled Slot',
+            title: p.problem || 'Clinical Consultation',
+            patient: p.patientname || 'Patient',
+            status: p.appointmentstatus === 'accept' ? 'Confirmed' : 'Pending'
+          }));
+
+          // Populate real activity
+          this.recentActivities = patients.slice(0, 4).map(p => ({
+            icon: 'fa-calendar-check-o',
+            title: `Appointment request: ${p.patientname}`,
+            subtitle: `Symptom: ${p.problem || 'General Checkup'} • Date: ${p.date}`,
+            time: p.date || 'Recent'
+          }));
+        } else {
+          this.setDefaultDoctorData();
+        }
       },
       error: () => {
-        this.totalPrescriptions = 0;
+        this.setDefaultDoctorData();
       }
     });
+
+    // Load Doctor's Real Slots
+    this.doctorService.getSlotDetails(this.loggedUser).subscribe({
+      next: (slots: any[]) => {
+        if (slots && Array.isArray(slots)) {
+          this.availableSlotsToday = slots.length;
+        }
+      },
+      error: () => {
+        this.availableSlotsToday = 0;
+      }
+    });
+  }
+
+  private setDefaultDoctorData(): void {
+    this.monthlyAppointments = 0;
+    this.activeCases = 0;
+    this.pendingApprovals = 0;
+
+    this.todaySchedule = [
+      {
+        time: '09:00 AM',
+        title: 'Morning Consultation',
+        patient: 'Waiting for bookings',
+        status: 'Pending'
+      }
+    ];
+
+    this.recentActivities = [
+      {
+        icon: 'fa-user-md',
+        title: 'Doctor Portal Initialized',
+        subtitle: 'Your clinical workspace is ready to receive appointments',
+        time: 'Just now'
+      }
+    ];
+
+    this.recentAppointments = [];
   }
 
   extractCount(data: any): number {

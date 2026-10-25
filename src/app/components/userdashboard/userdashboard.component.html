@@ -21,14 +21,14 @@
     <div class="profile-section">
       <div class="avatar-wrap">
         <img
-          *ngIf="gender === 'male' || gender === 'Male'"
-          src="assets/img/maleuser.png"
-          alt="Male User"
-        />
-        <img
           *ngIf="gender === 'female' || gender === 'Female'"
           src="assets/img/femaleuser.png"
           alt="Female User"
+        />
+        <img
+          *ngIf="gender !== 'female' && gender !== 'Female'"
+          src="assets/img/maleuser.png"
+          alt="Male User"
         />
       </div>
 
@@ -71,10 +71,10 @@
   <main class="dashboard-main">
     <section class="dashboard-hero">
       <div class="hero-left">
-        <p class="eyebrow">Dashboard Overview</p>
+        <p class="eyebrow">Patient Care Portal</p>
         <h1>Welcome back, {{ name }}</h1>
         <p class="hero-subtitle">
-          Manage your healthcare activities, appointments, and services from one place.
+          Manage your healthcare activities, appointments, and prescriptions from one centralized dashboard.
         </p>
 
         <div class="hero-actions">
@@ -92,13 +92,18 @@
 
       <div class="hero-right">
         <div class="hero-mini-card">
-          <span class="mini-label">Role</span>
-          <strong>{{ currRole || 'User' }}</strong>
+          <span class="mini-label">My Bookings</span>
+          <strong>{{ myAppointmentsCount }}</strong>
         </div>
 
         <div class="hero-mini-card">
-          <span class="mini-label">Profile</span>
-          <strong>Active</strong>
+          <span class="mini-label">Confirmed</span>
+          <strong>{{ myAcceptedCount }}</strong>
+        </div>
+
+        <div class="hero-mini-card">
+          <span class="mini-label">Pending</span>
+          <strong>{{ myPendingCount }}</strong>
         </div>
       </div>
     </section>
@@ -109,8 +114,8 @@
           <i class="fa fa-stethoscope"></i>
         </div>
         <div>
-          <h4>Smart Access</h4>
-          <p>Find doctors, slots, and prescriptions faster.</p>
+          <h4>Verified Specialists</h4>
+          <p>Book consults with qualified doctors in specialized departments.</p>
         </div>
       </div>
 
@@ -119,8 +124,8 @@
           <i class="fa fa-shield"></i>
         </div>
         <div>
-          <h4>Secure Dashboard</h4>
-          <p>Your healthcare information stays protected.</p>
+          <h4>Secure Healthcare</h4>
+          <p>Your consultations and digital records stay protected.</p>
         </div>
       </div>
 
@@ -129,12 +134,13 @@
           <i class="fa fa-bolt"></i>
         </div>
         <div>
-          <h4>Quick Actions</h4>
-          <p>Complete daily healthcare tasks in fewer clicks.</p>
+          <h4>Instant Tracking</h4>
+          <p>Track your approval progress and prescription status live.</p>
         </div>
       </div>
     </section>
 
+    <!-- LIVE METRICS GRID -->
     <section class="stats-grid">
       <article
         class="stat-card"
@@ -158,7 +164,7 @@
           <h3>{{ stat.title }}</h3>
 
           <h2 class="stat-value" *ngIf="stat.value$; else cardSubtitleOnly">
-            {{ stat.value$ | async }}
+            {{ (stat.value$ | async) ?? 0 }}
           </h2>
 
           <ng-template #cardSubtitleOnly>
@@ -178,6 +184,7 @@
     </section>
 
     <section class="dashboard-bottom">
+      <!-- QUICK ACTIONS -->
       <div class="info-panel">
         <div class="panel-header">
           <h3>Quick Access</h3>
@@ -190,7 +197,7 @@
               <i class="fa fa-user"></i>
             </div>
             <h4>Edit Profile</h4>
-            <p>Update your personal and account details.</p>
+            <p>Update personal and account details.</p>
           </div>
 
           <div class="quick-action-card" routerLink="/bookappointment">
@@ -198,7 +205,7 @@
               <i class="fa fa-calendar-check-o"></i>
             </div>
             <h4>Book Appointment</h4>
-            <p>Schedule a consultation with a doctor.</p>
+            <p>Schedule a consult with a specialist.</p>
           </div>
 
           <div class="quick-action-card" routerLink="/approvalstatus">
@@ -206,7 +213,7 @@
               <i class="fa fa-check-circle"></i>
             </div>
             <h4>Approval Status</h4>
-            <p>Track your appointment approvals easily.</p>
+            <p>Track your appointment approval status.</p>
           </div>
 
           <div class="quick-action-card" routerLink="/prescriptionlist">
@@ -219,45 +226,53 @@
         </div>
       </div>
 
-      <div class="activity-panel">
+      <!-- DYNAMIC MY APPOINTMENTS PANEL -->
+      <div class="activity-panel appointments-panel">
         <div class="panel-header">
-          <h3>User Highlights</h3>
-          <p>Helpful insights for your healthcare journey</p>
+          <div>
+            <h3>My Booked Consultations</h3>
+            <p>Real-time overview of your booked appointments</p>
+          </div>
+          <span class="badge-counter">{{ myAppointmentsCount }} Total</span>
         </div>
 
-        <div class="activity-list">
-          <div class="activity-item">
-            <div class="activity-dot blue-dot"></div>
-            <div>
-              <h4>Doctor Availability</h4>
-              <p>Browse specialists and check available slots instantly.</p>
+        <ng-container *ngIf="myAppointments$ | async as appointments">
+          <div class="my-appointments-list" *ngIf="appointments.length > 0; else noAppsTpl">
+            <div class="user-app-card" *ngFor="let app of appointments">
+              <div class="app-card-main">
+                <div class="app-doctor-info">
+                  <i class="fa fa-user-md doctor-icon"></i>
+                  <div>
+                    <h4>Dr. {{ app.doctorname }}</h4>
+                    <p class="app-dept">{{ app.specialization || 'Clinical Care' }} • Patient: {{ app.patientname }}</p>
+                  </div>
+                </div>
+                <span class="app-status-badge" [ngClass]="getStatusClass(app.appointmentstatus)">
+                  {{ getStatusLabel(app.appointmentstatus) }}
+                </span>
+              </div>
+
+              <div class="app-card-footer">
+                <span><i class="fa fa-calendar"></i> {{ app.date }}</span>
+                <span><i class="fa fa-clock-o"></i> {{ app.slot }}</span>
+                <span class="admission-tag" *ngIf="app.admissionstatus === 'accept'">
+                  <i class="fa fa-hospital-o"></i> Admitted
+                </span>
+              </div>
             </div>
           </div>
 
-          <div class="activity-item">
-            <div class="activity-dot green-dot"></div>
-            <div>
-              <h4>Appointment Management</h4>
-              <p>Book and manage appointments from a single dashboard.</p>
+          <ng-template #noAppsTpl>
+            <div class="no-appointments-box">
+              <i class="fa fa-calendar-plus-o"></i>
+              <h4>No Appointments Yet</h4>
+              <p>Schedule your first consultation with our verified medical specialists.</p>
+              <button class="hero-btn primary-btn btn-sm" routerLink="/bookappointment">
+                <i class="fa fa-plus"></i> Book Consultation
+              </button>
             </div>
-          </div>
-
-          <div class="activity-item">
-            <div class="activity-dot orange-dot"></div>
-            <div>
-              <h4>Prescription Access</h4>
-              <p>Review prescriptions whenever you need them.</p>
-            </div>
-          </div>
-
-          <div class="activity-item">
-            <div class="activity-dot purple-dot"></div>
-            <div>
-              <h4>Healthcare Services</h4>
-              <p>Explore hospital services and patient support modules.</p>
-            </div>
-          </div>
-        </div>
+          </ng-template>
+        </ng-container>
       </div>
     </section>
   </main>

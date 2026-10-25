@@ -1,5 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Observable, of } from 'rxjs';
+import { catchError, map, shareReplay, startWith } from 'rxjs/operators';
+import { Doctor } from 'src/app/models/doctor';
+import { DoctorService } from 'src/app/services/doctor.service';
+import { UserService } from 'src/app/services/user.service';
 
 interface PortalCard {
   title: string;
@@ -15,11 +20,6 @@ interface FeatureCard {
   icon: string;
   title: string;
   description: string;
-}
-
-interface StatCard {
-  value: string;
-  label: string;
 }
 
 interface Testimonial {
@@ -50,6 +50,14 @@ interface ProcessStep {
 })
 export class WelcomepageComponent implements OnInit {
   isMenuOpen = false;
+
+  doctorsCount$!: Observable<number>;
+  patientsCount$!: Observable<number>;
+  departmentsCount$!: Observable<number>;
+  slotsCount$!: Observable<number>;
+
+  approvedDoctors$!: Observable<Doctor[]>;
+  departments$!: Observable<string[]>;
 
   portals: PortalCard[] = [
     {
@@ -112,13 +120,6 @@ export class WelcomepageComponent implements OnInit {
       title: 'Role-Based Security',
       description: 'Improve data protection with role access, controlled operations and secure workflows.'
     }
-  ];
-
-  stats: StatCard[] = [
-    { value: '25K+', label: 'Patients Served' },
-    { value: '150+', label: 'Expert Doctors' },
-    { value: '45+', label: 'Departments' },
-    { value: '24/7', label: 'Emergency Support' }
   ];
 
   processSteps: ProcessStep[] = [
@@ -192,9 +193,70 @@ export class WelcomepageComponent implements OnInit {
     }
   ];
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    private userService: UserService,
+    private doctorService: DoctorService
+  ) { }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    this.initializeDynamicData();
+  }
+
+  private initializeDynamicData(): void {
+    this.doctorsCount$ = this.toCount(this.userService.getTotalDoctors());
+    this.patientsCount$ = this.toCount(this.userService.getTotalPatients());
+    this.slotsCount$ = this.toCount(this.userService.getTotalSlots());
+
+    this.departments$ = this.doctorService.getSlotListWithUniqueSpecializations().pipe(
+      map(deps => {
+        if (!deps || deps.length === 0) {
+          return ['Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics', 'General Medicine'];
+        }
+        return Array.from(new Set(deps.filter(Boolean).map(d => d.trim())));
+      }),
+      startWith(['Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics']),
+      catchError(() => of(['Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics'])),
+      shareReplay(1)
+    );
+
+    this.departmentsCount$ = this.departments$.pipe(
+      map(deps => Math.max(deps.length, 4)),
+      startWith(4),
+      shareReplay(1)
+    );
+
+    this.approvedDoctors$ = this.doctorService.getDoctorList().pipe(
+      map(doctors => (doctors || []).filter(doc => doc.status?.toLowerCase() === 'accept')),
+      startWith([]),
+      catchError(() => of([])),
+      shareReplay(1)
+    );
+  }
+
+  private toCount(source$: Observable<any>): Observable<number> {
+    return source$.pipe(
+      map((response: any) => {
+        if (typeof response === 'number') return response;
+        if (Array.isArray(response)) {
+          if (response.length === 1 && typeof response[0] === 'number') {
+            return response[0];
+          }
+          return response.length;
+        }
+        return Number(response) || 0;
+      }),
+      startWith(0),
+      catchError(() => of(0)),
+      shareReplay(1)
+    );
+  }
+
+  getDoctorImage(gender?: string): string {
+    return gender?.toLowerCase() === 'female'
+      ? 'assets/img/femaledoctor.png'
+      : 'assets/img/maledoctor.png';
+  }
 
   toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen;

@@ -2,46 +2,56 @@
 
 <div class="about-page">
   <section class="about-hero">
-    <div class="container hero-grid">
-      <div class="hero-content">
-        <span class="hero-badge">{{ heroBadge }}</span>
-        <h1>About {{ hospitalName }}</h1>
+    <div class="hero-shell container">
+      <div class="hero-left">
+        <span class="hero-tag">
+          <i class="fa fa-shield"></i> {{ heroBadge }}
+        </span>
+
+        <h1>
+          Delivering trusted healthcare through <span>compassion, modern systems,</span> and medical excellence.
+        </h1>
+
         <p class="hero-text">
-          For <span class="highlight">{{ yearsOfService }}+ years</span>,
-          {{ hospitalName }} has been committed to delivering reliable,
-          compassionate, and technology-enabled healthcare for individuals,
-          families, and communities.
+          {{ hospitalName }} is dedicated to providing high-standard patient care,
+          experienced medical specialists, and organized healthcare operations
+          designed to support patients throughout their clinical journey.
         </p>
 
-        <div class="hero-meta">
-          <div class="hero-meta-item">
+        <div class="hero-action-row">
+          <a routerLink="/bookappointment" class="hero-btn primary-btn">
+            <i class="fa fa-calendar-check-o"></i>
+            Book Appointment
+          </a>
+
+          <a routerLink="/services" class="hero-btn secondary-btn">
+            <i class="fa fa-stethoscope"></i>
+            Explore Services
+          </a>
+        </div>
+
+        <div class="hero-meta-row">
+          <div class="meta-item">
             <i class="fa fa-map-marker"></i>
             <span>{{ location }}</span>
           </div>
 
-          <div class="hero-meta-item">
+          <div class="meta-item">
             <i class="fa fa-clock-o"></i>
             <span>{{ supportAvailability }}</span>
           </div>
         </div>
-
-        <div class="hero-actions">
-          <a routerLink="/services" class="hero-btn primary-btn">
-            <i class="fa fa-stethoscope"></i>
-            Explore Services
-          </a>
-
-          <a routerLink="/bookappointment" class="hero-btn secondary-btn">
-            <i class="fa fa-calendar-check-o"></i>
-            Book Appointment
-          </a>
-        </div>
       </div>
 
-      <div class="hero-visual">
+      <div class="hero-right">
         <div class="hero-image-card">
-          <img src="assets/img/hospital.png" alt="Hospital Building" />
-          <div class="hero-floating-card">
+          <img
+            src="assets/img/hospital.png"
+            alt="Hospital Building"
+            class="hero-img"
+          />
+
+          <div class="floating-badge">
             <i class="fa fa-heartbeat"></i>
             <div>
               <h3>Patient-First Care</h3>
@@ -53,17 +63,50 @@
     </div>
   </section>
 
+  <!-- DYNAMIC STATS -->
   <section class="stats-section container">
     <div class="stats-grid">
-      <div class="stat-card" *ngFor="let item of highlights">
+      <div class="stat-card">
         <div class="stat-icon">
-          <i [class]="item.icon"></i>
+          <i class="fa fa-user-md"></i>
         </div>
-
         <div class="stat-content">
-          <h3>{{ item.value }}</h3>
-          <h4>{{ item.label }}</h4>
-          <p>{{ item.description }}</p>
+          <h3>{{ (doctorsCount$ | async) ?? 0 }}+</h3>
+          <h4>Medical Experts</h4>
+          <p>Experienced doctors, nurses, and specialists</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fa fa-hospital-o"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ yearsOfService }}+</h3>
+          <h4>Years of Service</h4>
+          <p>Serving patients with trust since inception</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fa fa-users"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ (patientsCount$ | async) ?? 0 }}+</h3>
+          <h4>Patients Served</h4>
+          <p>Successful consultations and treatment journeys</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fa fa-stethoscope"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ (departmentsCount$ | async) ?? 0 }}+</h3>
+          <h4>Departments</h4>
+          <p>Comprehensive care across multiple specialities</p>
         </div>
       </div>
     </div>
@@ -129,34 +172,34 @@
 
   <section class="values-section container">
     <div class="section-heading">
+      <span class="section-tag">Guiding Principles</span>
       <h2>Our Core Values</h2>
-      <p>
-        The principles that guide every patient interaction and medical
-        decision.
-      </p>
+      <p>Principles that guide every clinical decision and patient interaction.</p>
     </div>
 
     <div class="values-grid">
-      <div class="value-card" *ngFor="let value of coreValues">
+      <div class="value-card card-panel" *ngFor="let item of coreValues">
         <div class="value-icon">
-          <i [class]="value.icon"></i>
+          <i [class]="item.icon"></i>
         </div>
-        <h3>{{ value.title }}</h3>
-        <p>{{ value.description }}</p>
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.description }}</p>
       </div>
     </div>
   </section>
 
   <section class="timeline-section container">
     <div class="section-heading">
+      <span class="section-tag">Milestones</span>
       <h2>Our Growth Journey</h2>
-      <p>A brief look at important milestones in our healthcare journey.</p>
+      <p>How our institution evolved to provide modern healthcare solutions.</p>
     </div>
 
-    <div class="timeline-list">
+    <div class="timeline-track">
       <div class="timeline-item" *ngFor="let item of timeline">
-        <div class="timeline-year">{{ item.year }}</div>
-        <div class="timeline-dot"></div>
+        <div class="timeline-marker">
+          <span>{{ item.year }}</span>
+        </div>
         <div class="timeline-content">
           <h3>{{ item.title }}</h3>
           <p>{{ item.description }}</p>
@@ -165,22 +208,33 @@
     </div>
   </section>
 
-  <section class="leadership-section container">
+  <!-- ACTIVE VERIFIED SPECIALISTS -->
+  <section class="leadership-section container" *ngIf="activeDoctors$ | async as activeDoctors">
     <div class="section-heading">
-      <h2>Leadership Team</h2>
+      <span class="section-tag">Medical Staff</span>
+      <h2>Verified Medical Specialists</h2>
       <p>
-        Experienced professionals guiding operational excellence and patient
-        care.
+        Certified practitioners managing specialized clinical departments and patient consultations.
       </p>
     </div>
 
-    <div class="leadership-grid">
-      <div class="leader-card" *ngFor="let leader of leadershipTeam">
-        <img [src]="leader.image" [alt]="leader.name" class="leader-image" />
-        <h3>{{ leader.name }}</h3>
-        <p>{{ leader.role }}</p>
+    <div class="leadership-grid" *ngIf="activeDoctors.length > 0; else defaultTeamTpl">
+      <div class="leader-card" *ngFor="let doc of activeDoctors">
+        <img [src]="getDoctorImg(doc.gender)" [alt]="doc.doctorname" class="leader-image" />
+        <h3>Dr. {{ doc.doctorname }}</h3>
+        <p>{{ doc.specialization }} ({{ doc.experience }} Yrs Exp)</p>
       </div>
     </div>
+
+    <ng-template #defaultTeamTpl>
+      <div class="leadership-grid">
+        <div class="leader-card" *ngFor="let leader of leadershipTeam">
+          <img [src]="leader.image" [alt]="leader.name" class="leader-image" />
+          <h3>{{ leader.name }}</h3>
+          <p>{{ leader.role }}</p>
+        </div>
+      </div>
+    </ng-template>
   </section>
 
   <section class="cta-section container">

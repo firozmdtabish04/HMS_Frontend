@@ -87,7 +87,8 @@ export class LoginService {
   public adminLoginFromRemote(email: string, password: string) {
     if (email === 'mdtabishfiroz04@gmail.com' && password === 'Akhil@04')
     {
-      sessionStorage.setItem('user', email);
+      sessionStorage.setItem('USER', email);
+      sessionStorage.setItem('loggedUser', email);
       sessionStorage.setItem('ROLE', "admin");
       return true;
     }

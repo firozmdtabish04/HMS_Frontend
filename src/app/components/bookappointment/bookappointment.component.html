@@ -8,7 +8,7 @@
 <div class="booking-page">
   <div class="booking-shell">
     <!-- MESSAGE CARD -->
-    <div class="message-card" id="messagecard">
+    <div class="message-card" id="messagecard" *ngIf="showMessageCard">
       <div class="message-icon">
         <i
           class="fa"
@@ -40,7 +40,7 @@
     </div>
 
     <!-- TOP OVERVIEW -->
-    <section class="overview-grid" id="appointmentform">
+    <section class="overview-grid" id="appointmentform" *ngIf="!showMessageCard">
       <div class="overview-card">
         <div class="overview-icon teal">
           <i class="fa fa-user-md"></i>
@@ -72,7 +72,7 @@
       </div>
     </section>
 
-    <div class="booking-grid" id="appointmentcontent">
+    <div class="booking-grid" id="appointmentcontent" *ngIf="!showMessageCard">
       <!-- LEFT -->
       <section class="booking-main-card">
         <div class="page-header">

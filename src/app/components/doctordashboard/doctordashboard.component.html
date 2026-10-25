@@ -327,6 +327,11 @@
               </tr>
             </thead>
             <tbody>
+              <tr *ngIf="recentAppointments.length === 0">
+                <td colspan="5" style="text-align: center; padding: 24px; color: #64748b;">
+                  <i class="fa fa-info-circle"></i> No patient appointments booked yet. Your schedule is ready for bookings.
+                </td>
+              </tr>
               <tr *ngFor="let appointment of recentAppointments">
                 <td>{{ appointment.patientName }}</td>
                 <td>{{ appointment.department }}</td>

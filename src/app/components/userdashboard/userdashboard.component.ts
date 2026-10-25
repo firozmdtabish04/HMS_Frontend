@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, map, shareReplay } from 'rxjs/operators';
+import { Appointment } from 'src/app/models/appointment';
+import { DoctorService } from 'src/app/services/doctor.service';
 import { UserService } from 'src/app/services/user.service';
+
 interface DashboardStat {
   title: string;
   value$?: Observable<number>;
@@ -28,12 +31,18 @@ export class UserdashboardComponent implements OnInit {
   name = '';
   gender = '';
   currRole = '';
+  loggedUser = '';
   isCollapsed = false;
 
   totalPatients$!: Observable<number>;
   totalUsers$!: Observable<number>;
   totalDoctors$!: Observable<number>;
   totalSlots$!: Observable<number>;
+
+  myAppointments$!: Observable<Appointment[]>;
+  myAppointmentsCount = 0;
+  myAcceptedCount = 0;
+  myPendingCount = 0;
 
   stats: DashboardStat[] = [];
 
@@ -70,28 +79,34 @@ export class UserdashboardComponent implements OnInit {
     }
   ];
 
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private doctorService: DoctorService
+  ) {}
 
   ngOnInit(): void {
-    this.name = sessionStorage.getItem('loggedUser') || 'User';
+    const storedUsername = sessionStorage.getItem('username');
+    const storedName = sessionStorage.getItem('name');
+    this.loggedUser = sessionStorage.getItem('loggedUser') || '';
+    this.name = storedUsername || storedName || this.loggedUser || 'User';
     this.gender = sessionStorage.getItem('gender') || '';
-    this.currRole = sessionStorage.getItem('ROLE') || '';
+    this.currRole = sessionStorage.getItem('ROLE') || 'User';
 
     this.totalPatients$ = this.userService
       .getTotalPatients()
-      .pipe(map((res: any[]) => this.extractCount(res)));
+      .pipe(map((res: any[]) => this.extractCount(res)), shareReplay(1));
 
     this.totalUsers$ = this.userService
       .getTotalUsers()
-      .pipe(map((res: any[]) => this.extractCount(res)));
+      .pipe(map((res: any[]) => this.extractCount(res)), shareReplay(1));
 
     this.totalDoctors$ = this.userService
       .getTotalDoctors()
-      .pipe(map((res: any[]) => this.extractCount(res)));
+      .pipe(map((res: any[]) => this.extractCount(res)), shareReplay(1));
 
     this.totalSlots$ = this.userService
       .getTotalSlots()
-      .pipe(map((res: any[]) => this.extractCount(res)));
+      .pipe(map((res: any[]) => this.extractCount(res)), shareReplay(1));
 
     this.stats = [
       {
@@ -148,10 +163,52 @@ export class UserdashboardComponent implements OnInit {
         subtitle: 'Explore healthcare services'
       }
     ];
+
+    this.loadUserAppointments();
+  }
+
+  loadUserAppointments(): void {
+    if (!this.loggedUser) return;
+
+    this.myAppointments$ = this.doctorService.getPatientListByEmail(this.loggedUser).pipe(
+      catchError(() => of([])),
+      shareReplay(1)
+    );
+
+    this.myAppointments$.subscribe({
+      next: (apps) => {
+        if (apps && Array.isArray(apps)) {
+          this.myAppointmentsCount = apps.length;
+          this.myAcceptedCount = apps.filter(a => a.appointmentstatus === 'accept').length;
+          this.myPendingCount = apps.filter(a => a.appointmentstatus === 'false').length;
+        }
+      },
+      error: () => {
+        this.myAppointmentsCount = 0;
+      }
+    });
   }
 
   toggleSidebar(): void {
     this.isCollapsed = !this.isCollapsed;
+  }
+
+  getStatusClass(status?: string): string {
+    switch (status) {
+      case 'accept': return 'status-accepted';
+      case 'reject': return 'status-rejected';
+      case 'false':
+      default: return 'status-pending';
+    }
+  }
+
+  getStatusLabel(status?: string): string {
+    switch (status) {
+      case 'accept': return 'Confirmed';
+      case 'reject': return 'Cancelled';
+      case 'false':
+      default: return 'Pending Approval';
+    }
   }
 
   private extractCount(data: any): number {

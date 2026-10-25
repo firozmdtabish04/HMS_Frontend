@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { NgForm } from '@angular/forms';
 import { Appointment } from 'src/app/models/appointment';
 import { Slots } from 'src/app/models/slots';
 import { DoctorService } from 'src/app/services/doctor.service';
 import { UserService } from 'src/app/services/user.service';
-declare var $: any;
+
 
 @Component({
   standalone: false,
@@ -28,10 +28,12 @@ export class BookappointmentComponent implements OnInit {
   minDate = '';
   isSubmitting = false;
   isBookingFailed = true;
+  showMessageCard = false;
 
   constructor(
     private _service: DoctorService,
     private _router: Router,
+    private route: ActivatedRoute,
     private userService: UserService
   ) { }
 
@@ -45,7 +47,7 @@ export class BookappointmentComponent implements OnInit {
 
     this.minDate = this.getTodayDate();
 
-    $('#messagecard').hide();
+    this.showMessageCard = false;
   }
 
   getTodayDate(): string {
@@ -71,9 +73,9 @@ export class BookappointmentComponent implements OnInit {
   }
 
   showFormAgain(): void {
-    $('#messagecard').hide();
-    $('#appointmentform').show();
-    $('#appointmentcontent').show();
+    this.showMessageCard = false;
+
+
   }
 
   bookAppointment(): void {
@@ -89,9 +91,9 @@ export class BookappointmentComponent implements OnInit {
         console.log('process Failed');
         this.isSubmitting = false;
         this.isBookingFailed = true;
-        $('#appointmentform').hide();
-        $('#appointmentcontent').hide();
-        $('#messagecard').show();
+        this.showMessageCard = true;
+
+
         this.message =
           'There is a problem in booking your appointment. Please check slot availability and try again.';
         console.log(error.error);

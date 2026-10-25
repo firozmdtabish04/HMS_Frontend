@@ -31,15 +31,24 @@ export class PatientlistComponent implements OnInit {
     this.loggedUser = sessionStorage.getItem('loggedUser') || '';
     this.currRole = sessionStorage.getItem('ROLE') || '';
 
-    if (this.currRole.toLowerCase() === 'user')
+    if (this.currRole.toLowerCase() === 'doctor')
     {
       this.patients$ = this.doctorService.getPatientListByDoctorEmail(this.loggedUser);
+      if (!this.slots$) {
+      this.slots$ = this.doctorService.getSlotList();
+    }
+    } else if (this.currRole.toLowerCase() === 'user')
+    {
+      this.patients$ = this.doctorService.getPatientListByEmail(this.loggedUser);
+      this.slots$ = this.doctorService.getSlotList();
     } else
     {
       this.patients$ = this.doctorService.getPatientList();
     }
 
-    this.slots$ = this.doctorService.getSlotDetails(this.loggedUser);
+    if (!this.slots$) {
+      this.slots$ = this.doctorService.getSlotList();
+    }
   }
 
   acceptRequest(slot: string): void {
@@ -75,9 +84,16 @@ export class PatientlistComponent implements OnInit {
   }
 
   refreshPatients(): void {
-    if (this.currRole.toLowerCase() === 'user')
+    if (this.currRole.toLowerCase() === 'doctor')
     {
       this.patients$ = this.doctorService.getPatientListByDoctorEmail(this.loggedUser);
+      if (!this.slots$) {
+      this.slots$ = this.doctorService.getSlotList();
+    }
+    } else if (this.currRole.toLowerCase() === 'user')
+    {
+      this.patients$ = this.doctorService.getPatientListByEmail(this.loggedUser);
+      this.slots$ = this.doctorService.getSlotList();
     } else
     {
       this.patients$ = this.doctorService.getPatientList();

@@ -35,7 +35,7 @@ export class DoctorlistComponent implements OnInit {
   }
 
   isAdmin(): boolean {
-    return sessionStorage.getItem('ROLE') === 'admin';
+    return (sessionStorage.getItem('ROLE') || '').toLowerCase() === 'admin';
   }
 
   openDeleteConfirm(email: string): void {
