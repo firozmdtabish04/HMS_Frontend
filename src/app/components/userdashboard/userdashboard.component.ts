@@ -88,7 +88,13 @@ export class UserdashboardComponent implements OnInit {
     const storedUsername = sessionStorage.getItem('username');
     const storedName = sessionStorage.getItem('name');
     this.loggedUser = sessionStorage.getItem('loggedUser') || '';
-    this.name = storedUsername || storedName || this.loggedUser || 'User';
+    const rawName = storedUsername || storedName || this.loggedUser || 'User';
+    if (rawName && rawName.includes('@')) {
+      const clean = rawName.split('@')[0].replace(/[._-]+/g, ' ').trim();
+      this.name = clean.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    } else {
+      this.name = rawName;
+    }
     this.gender = sessionStorage.getItem('gender') || '';
     this.currRole = sessionStorage.getItem('ROLE') || 'User';
 
@@ -164,6 +170,10 @@ export class UserdashboardComponent implements OnInit {
       }
     ];
 
+    this.loadUserAppointments();
+  }
+
+  refreshUserData(): void {
     this.loadUserAppointments();
   }
 

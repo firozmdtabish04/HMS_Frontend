@@ -33,11 +33,11 @@ interface QualityItem {
   standalone: false,
   selector: 'app-about',
   templateUrl: './about.component.html',
-  styleUrls: ['./about.component.css']
+  styleUrls: ['./about.component.css'],
 })
 export class AboutComponent implements OnInit {
   hospitalName = 'Healthcare Management Hospital';
-  establishedYear = 2002;
+  establishedYear = 2023;
 
   heroBadge = 'Trusted Multi-Speciality Healthcare';
   location = 'Bhubaneswar, Odisha';
@@ -57,88 +57,96 @@ export class AboutComponent implements OnInit {
   coreValues: ValueItem[] = [
     {
       title: 'Compassion',
-      description: 'We treat every patient with empathy, dignity, and human-centered care.',
-      icon: 'fa fa-heart'
+      description:
+        'We treat every patient with empathy, dignity, and human-centered care.',
+      icon: 'fa fa-heart',
     },
     {
       title: 'Integrity',
-      description: 'We follow ethical medical practices with honesty and accountability.',
-      icon: 'fa fa-shield'
+      description:
+        'We follow ethical medical practices with honesty and accountability.',
+      icon: 'fa fa-shield',
     },
     {
       title: 'Excellence',
-      description: 'We strive for the highest standards in treatment, safety, and service.',
-      icon: 'fa fa-star'
+      description:
+        'We strive for the highest standards in treatment, safety, and service.',
+      icon: 'fa fa-star',
     },
     {
       title: 'Innovation',
-      description: 'We adopt modern healthcare systems and technology for better outcomes.',
-      icon: 'fa fa-lightbulb-o'
-    }
+      description:
+        'We adopt modern healthcare systems and technology for better outcomes.',
+      icon: 'fa fa-lightbulb-o',
+    },
   ];
 
   qualityIndicators: QualityItem[] = [
     {
       title: 'Patient Safety Protocols',
       status: 'Strong',
-      icon: 'fa fa-check-circle'
+      icon: 'fa fa-check-circle',
     },
     {
       title: 'Emergency Readiness',
       status: '24/7 Active',
-      icon: 'fa fa-ambulance'
+      icon: 'fa fa-ambulance',
     },
     {
       title: 'Digital Healthcare Workflow',
       status: 'Enabled',
-      icon: 'fa fa-laptop'
+      icon: 'fa fa-laptop',
     },
     {
       title: 'Care Coordination',
       status: 'Integrated',
-      icon: 'fa fa-sitemap'
-    }
+      icon: 'fa fa-sitemap',
+    },
   ];
 
   timeline: TimelineItem[] = [
     {
       year: '2002',
       title: 'Hospital Founded',
-      description: 'Started with a mission to provide dependable and compassionate healthcare.'
+      description:
+        'Started with a mission to provide dependable and compassionate healthcare.',
     },
     {
       year: '2009',
       title: 'Expanded Specialist Services',
-      description: 'Introduced advanced departments for heart care, orthopedics, and diagnostics.'
+      description:
+        'Introduced advanced departments for heart care, orthopedics, and diagnostics.',
     },
     {
       year: '2016',
       title: 'Technology Modernization',
-      description: 'Adopted digital patient workflows, reporting systems, and service coordination.'
+      description:
+        'Adopted digital patient workflows, reporting systems, and service coordination.',
     },
     {
       year: '2023',
       title: 'Enterprise Care Experience',
-      description: 'Strengthened patient support, appointment systems, and integrated care operations.'
-    }
+      description:
+        'Strengthened patient support, appointment systems, and integrated care operations.',
+    },
   ];
 
   leadershipTeam: LeadershipItem[] = [
     {
       name: 'Tabish Firoz',
       role: 'Managing Director & Hospital Lead',
-      image: 'assets/img/admin.png'
+      image: 'assets/img/admin.png',
     },
     {
       name: 'Dr. Abhilipsa Pati',
       role: 'Head of Neurology & Clinical Ops',
-      image: 'assets/img/femaledoctor.png'
+      image: 'assets/img/femaledoctor.png',
     },
     {
       name: 'Dr. Roshan Kumar Patra',
       role: 'Chief Medical Consultant',
-      image: 'assets/img/maledoctor.png'
-    }
+      image: 'assets/img/maledoctor.png',
+    },
   ];
 
   mission =
@@ -149,26 +157,30 @@ export class AboutComponent implements OnInit {
 
   constructor(
     private userService: UserService,
-    private doctorService: DoctorService
-  ) { }
+    private doctorService: DoctorService,
+  ) {}
 
   ngOnInit(): void {
     this.doctorsCount$ = this.toCount(this.userService.getTotalDoctors());
     this.patientsCount$ = this.toCount(this.userService.getTotalPatients());
     this.slotsCount$ = this.toCount(this.userService.getTotalSlots());
 
-    this.departmentsCount$ = this.doctorService.getSlotListWithUniqueSpecializations().pipe(
-      map(deps => deps && deps.length > 0 ? deps.length : 8),
-      startWith(8),
-      catchError(() => of(8)),
-      shareReplay(1)
-    );
+    this.departmentsCount$ = this.doctorService
+      .getSlotListWithUniqueSpecializations()
+      .pipe(
+        map((deps) => (deps && deps.length > 0 ? deps.length : 8)),
+        startWith(8),
+        catchError(() => of(8)),
+        shareReplay(1),
+      );
 
     this.activeDoctors$ = this.doctorService.getDoctorList().pipe(
-      map(docs => (docs || []).filter(d => d.status?.toLowerCase() === 'accept')),
+      map((docs) =>
+        (docs || []).filter((d) => d.status?.toLowerCase() === 'accept'),
+      ),
       startWith([]),
       catchError(() => of([])),
-      shareReplay(1)
+      shareReplay(1),
     );
   }
 
@@ -186,7 +198,7 @@ export class AboutComponent implements OnInit {
       }),
       startWith(0),
       catchError(() => of(0)),
-      shareReplay(1)
+      shareReplay(1),
     );
   }
 

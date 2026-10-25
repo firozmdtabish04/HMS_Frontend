@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Doctor } from 'src/app/models/doctor';
 import { DoctorService } from 'src/app/services/doctor.service';
 
@@ -72,15 +72,35 @@ export class DoctorprofileComponent implements OnInit {
     this.updateSuccess = false;
 
     this._service.UpdateDoctorProfile(this.doctor).subscribe({
-      next: () => {
+      next: (data) => {
         this.msg = 'Profile updated successfully.';
         this.updateSuccess = true;
         this.isEditMode = false;
+
+        if (data) {
+          this.doctor = { ...data };
+        }
+
+        if (this.doctor.doctorname) {
+          sessionStorage.setItem('doctorname', this.doctor.doctorname);
+          sessionStorage.setItem('name', this.doctor.doctorname);
+        }
+        if (this.doctor.gender) {
+          sessionStorage.setItem('gender', this.doctor.gender);
+        }
+        if (this.doctor.email) {
+          sessionStorage.setItem('loggedUser', this.doctor.email);
+        }
+
+        // Instant view update without needing refresh
+        this.profileDetails = of([this.doctor]);
+        window.dispatchEvent(new Event('storage'));
+
         this.getProfileDetails(this.loggedUser);
 
         setTimeout(() => {
           this._router.navigate(['/doctordashboard']);
-        }, 3000);
+        }, 2500);
       },
       error: (error) => {
         console.error('Profile Update Failed', error);
@@ -98,30 +118,20 @@ export class DoctorprofileComponent implements OnInit {
   }
 
   getExperienceLabel(exp: any): string {
-    const value = Number(exp || 0);
-    if (value <= 1)
-    {
-      return 'Junior Specialist';
-    } else if (value <= 5)
-    {
-      return 'Experienced Doctor';
-    } else if (value <= 10)
-    {
-      return 'Senior Consultant';
-    }
-    return 'Expert Consultant';
+    if (!exp && exp !== 0) return 'Experienced Specialist';
+    const num = Number(exp);
+    if (isNaN(num) || num <= 0) return 'Resident Practitioner';
+    if (num < 3) return `${num} Year(s) Associate Specialist`;
+    if (num < 8) return `${num} Years Senior Consultant`;
+    return `${num}+ Years Principal Specialist`;
   }
 
-  getInitials(name: string | undefined): string {
-    if (!name)
-    {
-      return 'DR';
-    }
-
-    return name
-      .split(' ')
-      .map(part => part.charAt(0).toUpperCase())
-      .slice(0, 2)
-      .join('');
+  getInitials(name?: string): string {
+    if (!name) return 'DR';
+    const clean = name.trim().replace(/^dr\.?\s*/i, '');
+    const parts = clean.split(/\s+/).filter(p => p.length > 0);
+    if (parts.length === 0) return 'DR';
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 }

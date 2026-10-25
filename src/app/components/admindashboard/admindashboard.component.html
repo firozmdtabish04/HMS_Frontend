@@ -66,6 +66,9 @@
       </div>
 
       <div class="topbar-right">
+        <button type="button" class="me-2 btn btn-sm btn-outline-info" (click)="refreshDashboard()" title="Reload live metrics">
+          <i class="fa fa-refresh"></i> Refresh
+        </button>
         <div class="admin-badge">
           <i class="fa fa-shield"></i>
           <span>{{ currRole }}</span>

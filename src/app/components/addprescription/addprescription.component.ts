@@ -15,9 +15,11 @@ import { UserService } from 'src/app/services/user.service';
 export class AddprescriptionComponent implements OnInit {
   currRole = '';
   loggedUser = '';
+  doctorDisplayName = '';
   message = '';
   prescriptionobj = new Prescription();
   appointment: Observable<Appointment[]> | undefined;
+  patientsList: Appointment[] = [];
 
   isSubmitting = false;
   showForm = true;
@@ -42,17 +44,75 @@ export class AddprescriptionComponent implements OnInit {
 
   ngOnInit(): void {
     this.loggedUser = sessionStorage.getItem('loggedUser') || '';
-
-
     this.currRole = sessionStorage.getItem('ROLE') || '';
 
-
-    this.appointment = this._service.getPatientList();
-
-    if (!this.prescriptionobj.doctorname && this.loggedUser)
-    {
-      this.prescriptionobj.doctorname = this.loggedUser;
+    // Initialize doctor real name from session
+    const storedDoctorName = sessionStorage.getItem('doctorname') || sessionStorage.getItem('name');
+    if (storedDoctorName && !storedDoctorName.includes('@')) {
+      this.doctorDisplayName = storedDoctorName;
+      this.prescriptionobj.doctorname = storedDoctorName;
+    } else if (this.loggedUser) {
+      // Fetch doctor profile by email to get real name
+      this._service.getDoctorListByEmail(this.loggedUser).subscribe({
+        next: (docs) => {
+          if (docs && docs.length > 0 && docs[0].doctorname) {
+            this.doctorDisplayName = docs[0].doctorname;
+            this.prescriptionobj.doctorname = docs[0].doctorname;
+            sessionStorage.setItem('doctorname', docs[0].doctorname);
+          } else {
+            this.doctorDisplayName = this.formatNameFromEmail(this.loggedUser);
+            this.prescriptionobj.doctorname = this.doctorDisplayName;
+          }
+        },
+        error: () => {
+          this.doctorDisplayName = this.formatNameFromEmail(this.loggedUser);
+          this.prescriptionobj.doctorname = this.doctorDisplayName;
+        }
+      });
     }
+
+    // Load patient list
+    this.appointment = this._service.getPatientList();
+    this.appointment.subscribe({
+      next: (list: Appointment[]) => {
+        if (list) {
+          this.patientsList = list;
+        }
+      }
+    });
+  }
+
+  onPatientChange(): void {
+    const selectedName = this.prescriptionobj.patientname;
+    if (!selectedName) return;
+
+    const matched = this.patientsList.find(p => p.patientname === selectedName);
+    if (matched) {
+      if (matched.patientid) {
+        this.prescriptionobj.patientid = matched.patientid;
+      }
+      if (matched.age) {
+        this.prescriptionobj.age = matched.age;
+      }
+      if (matched.gender) {
+        this.prescriptionobj.gender = matched.gender;
+      }
+      if (matched.problem) {
+        this.prescriptionobj.disease = matched.problem;
+      }
+      if (matched.admissionstatus) {
+        this.prescriptionobj.admissionstatus = matched.admissionstatus;
+      }
+    }
+  }
+
+  private formatNameFromEmail(email: string): string {
+    if (!email) return 'Doctor';
+    const clean = email.split('@')[0].replace(/[._-]+/g, ' ').trim();
+    return clean
+      .split(' ')
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(' ');
   }
 
   get prescriptionLength(): number {
@@ -74,16 +134,23 @@ export class AddprescriptionComponent implements OnInit {
     this.messageType = 'info';
   }
 
-  addPrescription() {
+  addPrescription(): void {
     if (this.isSubmitting) return;
+
+    // Ensure doctor's real name is used, not email
+    if (this.doctorDisplayName && (!this.prescriptionobj.doctorname || this.prescriptionobj.doctorname.includes('@'))) {
+      this.prescriptionobj.doctorname = this.doctorDisplayName;
+    } else if (this.prescriptionobj.doctorname && this.prescriptionobj.doctorname.includes('@')) {
+      this.prescriptionobj.doctorname = this.formatNameFromEmail(this.prescriptionobj.doctorname);
+    }
 
     this.isSubmitting = true;
 
-    this._service.addPrescriptions(this.prescriptionobj).subscribe(
-      data => {
-        console.log('Prescriptions added Successfully');
+    this._service.addPrescriptions(this.prescriptionobj).subscribe({
+      next: (data) => {
+        console.log('Prescription added successfully', data);
         this.message =
-          "Your prescription was added successfully. Please check the patient's admission status.";
+          "Your prescription was added successfully with doctor " + (this.prescriptionobj.doctorname || 'Doctor') + ".";
         this.messageType = 'success';
         this.showForm = false;
         this.showMessageCard = true;
@@ -91,18 +158,17 @@ export class AddprescriptionComponent implements OnInit {
 
         setTimeout(() => {
           this._router.navigate(['/doctordashboard']);
-        }, 5000);
+        }, 3500);
       },
-      error => {
-        console.log('process Failed');
+      error: (error) => {
+        console.error('Process Failed', error);
         this.message =
           'There was a problem while adding your prescription. Please try again.';
         this.messageType = 'error';
         this.showForm = false;
         this.showMessageCard = true;
         this.isSubmitting = false;
-        console.log(error?.error);
       }
-    );
+    });
   }
 }

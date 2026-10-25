@@ -45,6 +45,26 @@ export class BookappointmentComponent implements OnInit {
     this.specializations = this._service.getSlotListWithUniqueSpecializations();
     this.slots = this._service.getSlotList();
 
+    if (this.loggedUser) {
+      this.appointment.email = this.loggedUser;
+    }
+    const storedUsername = sessionStorage.getItem('username') || sessionStorage.getItem('name');
+    if (storedUsername) {
+      this.appointment.patientname = storedUsername;
+    }
+
+    this.route.queryParams.subscribe(params => {
+      if (params['doctor']) {
+        this.appointment.doctorname = params['doctor'];
+      }
+      if (params['specialization']) {
+        this.appointment.specialization = params['specialization'];
+      }
+      if (params['speciality']) {
+        this.appointment.specialization = params['speciality'];
+      }
+    });
+
     this.minDate = this.getTodayDate();
 
     this.showMessageCard = false;

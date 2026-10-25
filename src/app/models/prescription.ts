@@ -1,5 +1,6 @@
 export class Prescription
 {
+    id?: number;
     patientid : string = '';
     patientname : string = '';
     doctorname : string = '';

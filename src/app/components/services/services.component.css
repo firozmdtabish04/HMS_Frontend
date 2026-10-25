@@ -733,3 +733,23 @@
     width: 100%;
   }
 }
+
+/* Specialist Info Pill on Service Card */
+.service-specialist-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 12px 0;
+}
+
+.service-specialist-info i {
+  color: #16a34a;
+  font-size: 15px;
+}

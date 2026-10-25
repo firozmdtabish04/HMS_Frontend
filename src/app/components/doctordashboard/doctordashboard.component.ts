@@ -122,10 +122,21 @@ export class DoctordashboardComponent implements OnInit {
     const storedDoctorName = sessionStorage.getItem('doctorname');
     const storedName = sessionStorage.getItem('name');
     this.loggedUser = sessionStorage.getItem('loggedUser') || '';
-    this.name = storedDoctorName || storedName || this.loggedUser || 'Doctor';
+    const rawName = storedDoctorName || storedName || this.loggedUser || 'Doctor';
+    if (rawName && rawName.includes('@')) {
+      const clean = rawName.split('@')[0].replace(/[._-]+/g, ' ').trim();
+      this.name = clean.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    } else {
+      this.name = rawName;
+    }
     this.gender = sessionStorage.getItem('gender') || '';
     this.currRole = sessionStorage.getItem('ROLE') || 'Doctor';
 
+    this.loadDashboardStats();
+    this.loadDoctorSpecificData();
+  }
+
+  refreshDoctorData(): void {
     this.loadDashboardStats();
     this.loadDoctorSpecificData();
   }

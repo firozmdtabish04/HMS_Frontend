@@ -2,14 +2,14 @@
 
 <div class="about-page">
   <section class="about-hero">
-    <div class="hero-shell container">
-      <div class="hero-left">
-        <span class="hero-tag">
+    <div class="hero-grid container">
+      <div class="hero-content">
+        <span class="hero-badge">
           <i class="fa fa-shield"></i> {{ heroBadge }}
         </span>
 
         <h1>
-          Delivering trusted healthcare through <span>compassion, modern systems,</span> and medical excellence.
+          Delivering trusted healthcare through <span class="highlight">compassion, modern systems,</span> and medical excellence.
         </h1>
 
         <p class="hero-text">
@@ -18,7 +18,7 @@
           designed to support patients throughout their clinical journey.
         </p>
 
-        <div class="hero-action-row">
+        <div class="hero-actions">
           <a routerLink="/bookappointment" class="hero-btn primary-btn">
             <i class="fa fa-calendar-check-o"></i>
             Book Appointment
@@ -30,13 +30,13 @@
           </a>
         </div>
 
-        <div class="hero-meta-row">
-          <div class="meta-item">
+        <div class="hero-meta">
+          <div class="hero-meta-item">
             <i class="fa fa-map-marker"></i>
             <span>{{ location }}</span>
           </div>
 
-          <div class="meta-item">
+          <div class="hero-meta-item">
             <i class="fa fa-clock-o"></i>
             <span>{{ supportAvailability }}</span>
           </div>
@@ -73,7 +73,7 @@
         <div class="stat-content">
           <h3>{{ (doctorsCount$ | async) ?? 0 }}+</h3>
           <h4>Medical Experts</h4>
-          <p>Experienced doctors, nurses, and specialists</p>
+          <p>Certified doctors & clinical consultants</p>
         </div>
       </div>
 
@@ -197,9 +197,10 @@
 
     <div class="timeline-track">
       <div class="timeline-item" *ngFor="let item of timeline">
-        <div class="timeline-marker">
+        <div class="timeline-year">
           <span>{{ item.year }}</span>
         </div>
+        <div class="timeline-dot"></div>
         <div class="timeline-content">
           <h3>{{ item.title }}</h3>
           <p>{{ item.description }}</p>
@@ -208,7 +209,7 @@
     </div>
   </section>
 
-  <!-- ACTIVE VERIFIED SPECIALISTS -->
+  <!-- DYNAMIC VERIFIED SPECIALISTS -->
   <section class="leadership-section container" *ngIf="activeDoctors$ | async as activeDoctors">
     <div class="section-heading">
       <span class="section-tag">Medical Staff</span>
@@ -222,7 +223,10 @@
       <div class="leader-card" *ngFor="let doc of activeDoctors">
         <img [src]="getDoctorImg(doc.gender)" [alt]="doc.doctorname" class="leader-image" />
         <h3>Dr. {{ doc.doctorname }}</h3>
-        <p>{{ doc.specialization }} ({{ doc.experience }} Yrs Exp)</p>
+        <p>{{ doc.specialization }} • {{ doc.experience }} Yrs Exp</p>
+        <span class="badge badge-success" style="background:#e0f2fe; color:#0369a1; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:600; display:inline-block; margin-top:6px;">
+          {{ doc.previoushospital || 'AIIMS Verified' }}
+        </span>
       </div>
     </div>
 

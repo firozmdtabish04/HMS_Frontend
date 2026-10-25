@@ -2,18 +2,19 @@
 
 <div class="prescription-page">
   <link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-/>
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+  />
+
   <div class="page-shell">
     <!-- Hero -->
     <section class="hero-card">
       <div class="hero-content">
         <p class="hero-badge-text">Digital Patient Records</p>
-        <h1>Your Prescription Center</h1>
+        <h1>Prescription Management Center</h1>
         <p>
-          Search and view prescription records in a secure, printable, and
-          enterprise-grade layout.
+          Search and view prescription records by patient name or Gmail. Verified
+          consulting specialist details with live clinical status.
         </p>
       </div>
 
@@ -22,27 +23,35 @@
       </div>
     </section>
 
+    <!-- Global Alerts -->
+    <div class="alert alert-success" *ngIf="updateSuccessMessage">
+      <i class="fa fa-check-circle"></i> {{ updateSuccessMessage }}
+    </div>
+    <div class="alert alert-danger" *ngIf="updateErrorMessage">
+      <i class="fa fa-exclamation-circle"></i> {{ updateErrorMessage }}
+    </div>
+
     <!-- Search Card -->
     <section class="search-card" *ngIf="showSearchCard">
       <div class="card-header-block">
-        <h2>Search Prescription</h2>
-        <p>Enter the patient name to fetch prescription details.</p>
+        <h2>Search Prescriptions</h2>
+        <p>Enter the patient name or patient Gmail address to fetch prescription history.</p>
       </div>
 
       <form #tempform="ngForm" (ngSubmit)="searchPrescription()" class="search-form">
         <div class="form-group">
           <label for="patientname">
-            Patient Name
+            Patient Name or Gmail Address
             <span class="required">*</span>
           </label>
 
           <div class="input-wrap">
-            <i class="fa fa-user"></i>
+            <i class="fa fa-envelope-o"></i>
             <input
               id="patientname"
               type="text"
               class="form-control"
-              placeholder="Enter patient name"
+              placeholder="e.g. user@gmail.com or Rahul Sharma"
               name="patientname"
               [(ngModel)]="name"
               required
@@ -55,18 +64,37 @@
             class="text-danger"
             [class.d-none]="patientname.valid || patientname.untouched"
           >
-            Required field
+            Please enter a patient name or Gmail address.
           </small>
+        </div>
+
+        <!-- Quick Search Chip for Logged In User -->
+        <div class="quick-chips-row" *ngIf="loggedUser">
+          <span class="chip-label">Quick search:</span>
+          <button
+            type="button"
+            class="quick-chip-btn"
+            (click)="searchMyPrescriptions()"
+          >
+            <i class="fa fa-user-circle"></i>
+            My Records ({{ loggedUser }})
+          </button>
         </div>
 
         <div class="action-row">
           <button
             type="submit"
-            [disabled]="tempform.form.invalid"
+            [disabled]="tempform.form.invalid || isLoading"
             class="primary-btn"
           >
-            <i class="fa fa-search"></i>
-            Search Prescription
+            <span *ngIf="!isLoading">
+              <i class="fa fa-search"></i>
+              Search Prescriptions
+            </span>
+            <span *ngIf="isLoading">
+              <i class="fa fa-spinner fa-spin"></i>
+              Searching...
+            </span>
           </button>
 
           <button type="button" class="secondary-btn" (click)="clearSearch()">
@@ -76,33 +104,33 @@
         </div>
       </form>
 
-      <!-- NEW QUICK INFO -->
+      <!-- Quick Info Cards -->
       <div class="quick-info-grid">
         <div class="quick-info-card">
-          <div class="quick-icon"><i class="fa fa-lock"></i></div>
+          <div class="quick-icon"><i class="fa fa-shield"></i></div>
           <div>
-            <h4>Secure Search</h4>
-            <p>Access patient prescription records safely.</p>
+            <h4>Gmail-Linked Prescriptions</h4>
+            <p>Direct lookup via authenticated patient Gmail or appointment profile.</p>
           </div>
         </div>
 
         <div class="quick-info-card">
-          <div class="quick-icon"><i class="fa fa-print"></i></div>
+          <div class="quick-icon"><i class="fa fa-user-md"></i></div>
           <div>
-            <h4>Print Ready</h4>
-            <p>Generate a clean printable prescription view.</p>
+            <h4>Verified Specialist Name</h4>
+            <p>Every prescription confirms the consulting doctor's professional name.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Results -->
+    <!-- Results Section -->
     <ng-container *ngIf="showPrescriptionPages">
       <ng-container *ngIf="prescriptionlist | async as prescriptions">
         <section class="toolbar-card">
           <div class="toolbar-left">
-            <h3>Prescription Results</h3>
-            <p>{{ prescriptions.length }} record(s) found</p>
+            <h3>Prescription Records</h3>
+            <p>{{ prescriptions.length }} prescription(s) found for <strong>{{ name }}</strong></p>
           </div>
 
           <div class="toolbar-right">
@@ -113,7 +141,7 @@
               class="print-btn"
             >
               <i class="fa fa-print"></i>
-              Print
+              Print Prescriptions
             </button>
 
             <button class="secondary-btn" (click)="clearSearch()">
@@ -123,14 +151,22 @@
           </div>
         </section>
 
+        <!-- Empty State -->
         <section class="empty-state-card" *ngIf="prescriptions.length === 0">
           <div class="empty-icon">
             <i class="fa fa-folder-open-o"></i>
           </div>
-          <h3>No prescription found</h3>
-          <p>No patient prescription records matched the entered name.</p>
+          <h3>No prescriptions found</h3>
+          <p>
+            No patient prescription records matched <strong>{{ name }}</strong>.
+            Please verify the spelling or try searching with your Gmail address.
+          </p>
+          <button class="primary-btn" (click)="clearSearch()">
+            <i class="fa fa-search"></i> Search Again
+          </button>
         </section>
 
+        <!-- Prescription Cards List -->
         <div class="prescription-list" *ngIf="prescriptions.length > 0">
           <article
             class="prescription-card"
@@ -151,37 +187,51 @@
               </div>
             </div>
 
+            <!-- Card Header Strip -->
             <div class="card-strip">
               <div class="doctor-block">
                 <p class="meta-label">Consulting Doctor</p>
-                <h4>Dr. {{ patient.doctorname }} MBBS, MS, PhD</h4>
+                <h4>
+                  {{ formatDoctorName(patient.doctorname) }}
+                  <small class="degree">MBBS, MS, PhD</small>
+                </h4>
               </div>
 
-              <div class="status-block">
+              <div class="status-and-action-block">
                 <span
                   class="status"
                   [ngClass]="getAdmissionStatusClass(patient.admissionstatus)"
                 >
                   {{ getAdmissionStatusLabel(patient.admissionstatus) }}
                 </span>
+
+                <button
+                  *ngIf="canEditPrescription()"
+                  class="btn-edit-prescription"
+                  type="button"
+                  (click)="startEditPrescription(patient)"
+                >
+                  <i class="fa fa-pencil"></i> Edit
+                </button>
               </div>
             </div>
 
+            <!-- Prescription Body -->
             <div class="prescription-body">
               <div class="info-grid">
                 <div class="info-card">
                   <span class="label">Patient ID</span>
-                  <strong>{{ patient.patientid }}</strong>
+                  <strong>{{ patient.patientid || 'N/A' }}</strong>
                 </div>
 
                 <div class="info-card">
-                  <span class="label">Date</span>
+                  <span class="label">Prescription Date</span>
                   <strong>{{ patient.date }}</strong>
                 </div>
 
                 <div class="info-card">
                   <span class="label">Age</span>
-                  <strong>{{ patient.age }}</strong>
+                  <strong>{{ patient.age }} Years</strong>
                 </div>
 
                 <div class="info-card">
@@ -193,16 +243,16 @@
               <div class="detail-section">
                 <div class="detail-row">
                   <span class="detail-title">Patient Name</span>
-                  <span class="detail-value">{{ patient.patientname }}</span>
+                  <span class="detail-value highlight-name">{{ patient.patientname }}</span>
                 </div>
 
                 <div class="detail-row">
-                  <span class="detail-title">Disease</span>
-                  <span class="detail-value">{{ patient.disease }}</span>
+                  <span class="detail-title">Diagnosis / Disease</span>
+                  <span class="detail-value disease-badge">{{ patient.disease }}</span>
                 </div>
 
                 <div class="detail-row prescription-row">
-                  <span class="detail-title">Prescription</span>
+                  <span class="detail-title">Prescription & Advice</span>
                   <span class="detail-value prescription-text">
                     {{ patient.prescription }}
                   </span>
@@ -210,6 +260,7 @@
               </div>
 
               <div class="wellness-note">
+                <i class="fa fa-heartbeat"></i>
                 Follow the prescribed medication and doctor instructions properly.
                 Wishing you a speedy recovery.
               </div>
@@ -218,18 +269,121 @@
             <div class="card-footer">
               <div class="footer-item">
                 <i class="fa fa-phone"></i>
-                <span>Phone: 9698382306 / 8610254674</span>
+                <span>Helpline: +91 8102946894 / 8610254674</span>
               </div>
 
               <div class="footer-item">
                 <i class="fa fa-envelope"></i>
-                <span>Email: mdtabishfiroz04@gmail.com</span>
+                <span>Support: support@healthcaresystem.com</span>
               </div>
             </div>
           </article>
         </div>
       </ng-container>
     </ng-container>
+  </div>
+</div>
+
+<!-- EDIT PRESCRIPTION MODAL / PANEL -->
+<div class="edit-modal-overlay" *ngIf="editingPrescription">
+  <div class="edit-modal-card">
+    <div class="modal-header">
+      <h3>
+        <i class="fa fa-pencil-square-o"></i>
+        Update Prescription Record
+      </h3>
+      <button type="button" class="close-btn" (click)="cancelEditPrescription()">
+        &times;
+      </button>
+    </div>
+
+    <form (ngSubmit)="savePrescriptionUpdate()" class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Patient Name</label>
+          <input
+            type="text"
+            class="form-control"
+            [value]="editingPrescription.patientname"
+            disabled
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Doctor Name <span class="required">*</span></label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Doctor Full Name"
+            [(ngModel)]="editDoctorName"
+            name="editDoctorName"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Disease / Diagnosis <span class="required">*</span></label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Diagnosis"
+            [(ngModel)]="editDisease"
+            name="editDisease"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Admission Status</label>
+          <select
+            class="form-control"
+            [(ngModel)]="editAdmissionStatus"
+            name="editAdmissionStatus"
+          >
+            <option value="false">Admission Pending</option>
+            <option value="accept">Admitted</option>
+            <option value="reject">Rejected</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Prescription & Instructions <span class="required">*</span></label>
+        <textarea
+          rows="5"
+          class="form-control"
+          placeholder="Medicines and instructions"
+          [(ngModel)]="editPrescriptionText"
+          name="editPrescriptionText"
+          required
+        ></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn secondary-btn"
+          (click)="cancelEditPrescription()"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          class="btn primary-btn"
+          [disabled]="isUpdating || !editDoctorName || !editPrescriptionText"
+        >
+          <span *ngIf="!isUpdating">
+            <i class="fa fa-save"></i> Save & Update
+          </span>
+          <span *ngIf="isUpdating">
+            <i class="fa fa-spinner fa-spin"></i> Updating...
+          </span>
+        </button>
+      </div>
+    </form>
   </div>
 </div>
 

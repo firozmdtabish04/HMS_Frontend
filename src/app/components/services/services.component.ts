@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   OnDestroy,
@@ -24,6 +25,8 @@ interface ServiceItem {
   badge: string;
   rating: number;
   featured: boolean;
+  specialistCount?: number;
+  specialists?: string[];
 }
 
 interface ReviewItem {
@@ -59,7 +62,8 @@ export class ServicesComponent implements AfterViewInit, OnDestroy, OnInit {
   constructor(
     private router: Router,
     private userService: UserService,
-    private doctorService: DoctorService
+    private doctorService: DoctorService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   observer?: IntersectionObserver;
@@ -240,6 +244,54 @@ export class ServicesComponent implements AfterViewInit, OnDestroy, OnInit {
   ngOnInit(): void {
     this.initializeCounts();
     this.initializeHospitalStats();
+    this.loadDynamicDoctorsAndDepartments();
+  }
+
+  private loadDynamicDoctorsAndDepartments(): void {
+    this.doctorService.getDoctorList().subscribe({
+      next: (doctors) => {
+        if (!doctors || doctors.length === 0) return;
+
+        doctors.forEach((doc) => {
+          if (!doc.specialization) return;
+          const spec = doc.specialization.trim();
+          const specLower = spec.toLowerCase();
+
+          const existing = this.services.find(
+            s => s.title.toLowerCase().includes(specLower) || specLower.includes(s.title.toLowerCase())
+          );
+
+          if (existing) {
+            existing.specialistCount = (existing.specialistCount || 0) + 1;
+            existing.specialists = existing.specialists || [];
+            if (!existing.specialists.includes(doc.doctorname)) {
+              existing.specialists.push(doc.doctorname);
+            }
+          } else {
+            const newService: ServiceItem = {
+              title: spec,
+              text: `Expert clinical consultations and specialized treatments led by Dr. ${doc.doctorname}.`,
+              icon: 'fa fa-user-md',
+              link: '/bookappointment',
+              category: spec,
+              availability: 'Mon-Sat',
+              badge: 'Specialist Available',
+              rating: 4.9,
+              featured: true,
+              specialistCount: 1,
+              specialists: [doc.doctorname]
+            };
+            this.services.unshift(newService);
+            if (!this.categories.includes(spec)) {
+              this.categories.push(spec);
+            }
+          }
+        });
+
+        this.cdr.markForCheck();
+      },
+      error: () => {}
+    });
   }
 
   get filteredServices(): ServiceItem[] {

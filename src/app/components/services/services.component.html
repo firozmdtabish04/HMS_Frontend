@@ -39,7 +39,7 @@
     </div>
   </section>
 
-  <section class="services-filters container" id="services-directory">
+  <section class="container services-filters" id="services-directory">
     <div class="filters-header">
       <div>
         <h2>Find the right medical service</h2>
@@ -83,7 +83,7 @@
     </div>
   </section>
 
-  <section class="featured-section container">
+  <section class="container featured-section">
     <div class="section-heading">
       <h2>Featured Departments</h2>
       <p>Most trusted and frequently booked healthcare services.</p>
@@ -110,7 +110,7 @@
     </div>
   </section>
 
-  <section class="services-section container">
+  <section class="container services-section">
     <div class="section-heading">
       <h2>All Medical Services</h2>
       <p>{{ filteredServices.length }} services available</p>
@@ -147,6 +147,11 @@
           </div>
         </div>
 
+        <div class="service-specialist-info" *ngIf="service.specialistCount && service.specialistCount > 0">
+          <i class="fa fa-user-md"></i>
+          <span>{{ service.specialistCount }} Doctor(s) Available: {{ service.specialists?.join(', ') }}</span>
+        </div>
+
         <div class="service-actions">
           <button type="button" class="service-btn primary-service-btn" (click)="bookAppointment(service.title)">
             <i class="fa fa-calendar-plus-o"></i>
@@ -169,7 +174,7 @@
     </div>
   </section>
 
-  <section class="emergency-section container">
+  <section class="container emergency-section">
     <div class="emergency-card">
       <div class="emergency-left">
         <div class="emergency-icon">
@@ -209,7 +214,7 @@
     </div>
   </section>
 
-  <section class="reviews-section container">
+  <section class="container reviews-section">
     <div class="section-heading">
       <h2>What Our Patients Say</h2>
       <p>Trusted feedback from patients across departments.</p>
@@ -234,7 +239,7 @@
     </div>
   </section>
 
-  <section class="faq-section container">
+  <section class="container faq-section">
     <div class="section-heading">
       <h2>Frequently Asked Questions</h2>
       <p>Helpful information for appointments and services.</p>

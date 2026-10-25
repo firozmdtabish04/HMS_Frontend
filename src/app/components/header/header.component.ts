@@ -23,6 +23,16 @@ export class HeaderComponent implements OnInit {
   constructor(private router: Router) { } 
 
   ngOnInit(): void {
+    this.loadHeaderState();
+    this.startClock();
+  }
+
+  @HostListener('window:storage')
+  onStorageChange(): void {
+    this.loadHeaderState();
+  }
+
+  loadHeaderState(): void {
     this.loggedUser = sessionStorage.getItem('loggedUser') || '';
     this.currRole = (sessionStorage.getItem('ROLE') || '').toLowerCase();
 
@@ -51,8 +61,6 @@ export class HeaderComponent implements OnInit {
       this.homeRoute = '/';
       this.displayUserName = storedName || this.formatNameFromEmail(this.loggedUser);
     }
-
-    this.startClock();
   }
 
   private startClock(): void {
@@ -122,23 +130,9 @@ export class HeaderComponent implements OnInit {
   }
 
   private openWhatsApp(message: string): void {
-    const whatsappUrl = `https://wa.me/${this.emergencyPhone}?text=${encodeURIComponent(message)}`;
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${this.emergencyPhone}?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
-  }
-
-  getInitials(name: string): string {
-    if (!name)
-    {
-      return 'U';
-    }
-
-    return name
-      .trim()
-      .split(' ')
-      .filter(part => part)
-      .slice(0, 2)
-      .map(part => part.charAt(0).toUpperCase())
-      .join('');
   }
 
   private formatNameFromEmail(email: string): string {
@@ -158,12 +152,12 @@ export class HeaderComponent implements OnInit {
       .join(' ');
   }
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: Event): void {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.user-dropdown'))
-    {
-      this.closeDropdown();
-    }
+  getInitials(name?: string): string {
+    if (!name) return 'U';
+    const clean = name.trim().replace(/^dr\.?\s*/i, '');
+    const parts = clean.split(/\s+/).filter(p => p.length > 0);
+    if (parts.length === 0) return 'U';
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 }

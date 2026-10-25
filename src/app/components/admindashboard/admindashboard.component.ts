@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Observable, combineLatest, of } from 'rxjs';
 import { catchError, map, shareReplay, startWith } from 'rxjs/operators';
 import { UserService } from 'src/app/services/user.service';
@@ -94,8 +94,15 @@ export class AdmindashboardComponent implements OnInit {
 
   constructor(
     private readonly userService: UserService,
-    private readonly doctorService: DoctorService
+    private readonly doctorService: DoctorService,
+    private readonly cdr: ChangeDetectorRef
   ) { }
+
+  refreshDashboard(): void {
+    this.initializeCounts();
+    this.initializeRecentActivity();
+    this.cdr.markForCheck();
+  }
 
   ngOnInit(): void {
     this.loadSessionValues();

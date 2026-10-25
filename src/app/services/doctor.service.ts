@@ -87,6 +87,10 @@ export class DoctorService {
     return this._http.post<any>(`${NAV_URL}/addPrescription`, prescription);
   }
 
+  updatePrescription(prescription: Prescription): Observable<Prescription> {
+    return this._http.put<Prescription>(`${NAV_URL}/updateprescription`, prescription);
+  }
+
   getProfileDetails(loggedUser: string): Observable<Doctor[]> {
     return this._http.get<Doctor[]>(`${NAV_URL}/doctorProfileDetails/${loggedUser}`);
   }

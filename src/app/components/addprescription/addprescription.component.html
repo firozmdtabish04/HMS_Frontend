@@ -62,8 +62,8 @@
 
       <div class="header-meta">
         <div class="meta-card">
-          <span class="meta-label">Logged in as</span>
-          <strong>{{ loggedUser || 'Doctor' }}</strong>
+          <span class="meta-label">Attending Doctor</span>
+          <strong>{{ doctorDisplayName || prescriptionobj.doctorname || 'Doctor' }}</strong>
         </div>
         <div class="meta-card">
           <span class="meta-label">Role</span>
@@ -83,7 +83,7 @@
               <label for="patientname">
                 Patient Name
                 <span class="required">*</span>
-                <small>(choose from the dropdown)</small>
+                <small>(choose from the dropdown to auto-fill details)</small>
               </label>
 
               <select
@@ -91,6 +91,7 @@
                 id="patientname"
                 name="patientname"
                 [(ngModel)]="prescriptionobj.patientname"
+                (change)="onPatientChange()"
                 #patientname="ngModel"
                 required
                 [class.is-invalid]="patientname.invalid && patientname.touched"
@@ -100,7 +101,7 @@
                   *ngFor="let patient of appointment | async"
                   [value]="patient.patientname"
                 >
-                  {{ patient.patientname }}
+                  {{ patient.patientname }} ({{ patient.gender }}, {{ patient.age }} yrs)
                 </option>
               </select>
 
@@ -116,14 +117,14 @@
               <label for="doctorname">
                 Doctor Name
                 <span class="required">*</span>
-                <small>(auto-filled from login session)</small>
+                <small>(Consulting Specialist)</small>
               </label>
 
               <input
                 type="text"
                 id="doctorname"
                 class="form-control"
-                placeholder="Enter your name"
+                placeholder="Doctor Full Name (e.g. Dr. John Doe)"
                 name="doctorname"
                 [(ngModel)]="prescriptionobj.doctorname"
                 required
@@ -148,7 +149,7 @@
           <div class="form-row three-col">
             <div class="form-group">
               <label for="disease">
-                Patient Disease
+                Patient Disease / Diagnosis
                 <span class="required">*</span>
               </label>
 
@@ -261,7 +262,7 @@
 
           <div class="form-group">
             <label for="prescription">
-              Prescription
+              Prescription & Dosage Instructions
               <span class="required">*</span>
             </label>
 
@@ -284,7 +285,7 @@
                 class="text-danger"
                 [class.d-none]="prescription.valid || prescription.untouched"
               >
-                Prescription is required and should be meaningful.
+                Prescription is required and should be meaningful (min 15 characters).
               </small>
 
               <small

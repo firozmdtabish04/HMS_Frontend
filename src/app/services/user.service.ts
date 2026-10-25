@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Appointment } from '../models/appointment';
+import { Prescription } from '../models/prescription';
 
 const NAV_URL = environment.apiURL;
 
@@ -23,9 +24,19 @@ export class UserService {
     return this._http.post<any>(`${NAV_URL}/bookNewAppointment`,appointment);
   }
 
-  getPrescriptionsByName(name : string) : Observable<any>
+  getPrescriptionsByName(name : string) : Observable<Prescription[]>
   {
-    return this._http.get<any>(`${NAV_URL}/getprescriptionbyname/`+name);
+    return this._http.get<Prescription[]>(`${NAV_URL}/getprescriptionbyname/`+name);
+  }
+
+  getPrescriptionsByEmail(email : string) : Observable<Prescription[]>
+  {
+    return this._http.get<Prescription[]>(`${NAV_URL}/getprescriptionbyemail/`+email);
+  }
+
+  updatePrescription(prescription : Prescription) : Observable<Prescription>
+  {
+    return this._http.put<Prescription>(`${NAV_URL}/updateprescription`, prescription);
   }
 
   public getProfileDetails(loggedUser : string) : Observable<any>
@@ -67,6 +78,5 @@ export class UserService {
   {
     return this._http.get<any>(`${NAV_URL}/gettotalprescriptions`);
   }
-
 
 }

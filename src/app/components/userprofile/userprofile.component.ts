@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { User } from 'src/app/models/user';
 import { UserService } from 'src/app/services/user.service';
 
@@ -17,7 +17,7 @@ export class UserprofileComponent implements OnInit {
   currRole = '';
   loggedUser = '';
   temp = false;
-  isEditMode = true;
+  isEditMode = false;
 
   constructor(
     private _service: UserService,
@@ -32,10 +32,15 @@ export class UserprofileComponent implements OnInit {
 
   editProfile(): void {
     this.isEditMode = true;
+    this.msg = '';
+    this.temp = false;
   }
 
   cancelEdit(): void {
     this.isEditMode = false;
+    this.msg = '';
+    this.temp = false;
+    this.getProfileDetails(this.loggedUser);
   }
 
   getProfileDetails(loggedUser: string): void {
@@ -48,29 +53,53 @@ export class UserprofileComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.log(error);
+        console.error('Error fetching user profile', error);
       }
     });
   }
 
   updateUserProfile(): void {
-    this._service.UpdateUserProfile(this.user).subscribe(
-      data => {
-        console.log('UserProfile Updated successfully');
+    this.msg = '';
+    this.temp = false;
+
+    this._service.UpdateUserProfile(this.user).subscribe({
+      next: (data) => {
+        console.log('UserProfile Updated successfully', data);
         this.msg = 'Profile Updated Successfully !!!';
         this.temp = true;
         this.isEditMode = false;
 
+        if (data) {
+          this.user = { ...data };
+        }
+
+        // Update sessionStorage immediately so Header and Dashboard reflect changes
+        if (this.user.username) {
+          sessionStorage.setItem('username', this.user.username);
+          sessionStorage.setItem('name', this.user.username);
+        }
+        if (this.user.gender) {
+          sessionStorage.setItem('gender', this.user.gender);
+        }
+        if (this.user.email) {
+          sessionStorage.setItem('loggedUser', this.user.email);
+        }
+
+        // Immediately update view without requiring refresh
+        this.profileDetails = of([this.user]);
+        window.dispatchEvent(new Event('storage'));
+
+        this.getProfileDetails(this.user.email || this.loggedUser);
+
         setTimeout(() => {
           this._router.navigate(['/userdashboard']);
-        }, 3000);
+        }, 2500);
       },
-      error => {
-        console.log('Profile Updation Failed');
-        console.log(error.error);
-        this.msg = 'Profile Updation Failed !!!';
+      error: (error) => {
+        console.error('Profile Updation Failed', error);
+        this.msg = 'Profile Updation Failed. Please try again.';
       }
-    );
+    });
   }
 
   backToDashboard(): void {

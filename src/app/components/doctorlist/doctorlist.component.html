@@ -145,7 +145,8 @@
                 *ngIf="!isAdmin()"
                 class="action-btn primary-btn"
                 type="button"
-                routerLink="/bookappointment"
+                [routerLink]="['/bookappointment']"
+                [queryParams]="{ doctor: doctor.doctorname, specialization: doctor.specialization }"
               >
                 <i class="fa fa-calendar"></i>
                 Book Now

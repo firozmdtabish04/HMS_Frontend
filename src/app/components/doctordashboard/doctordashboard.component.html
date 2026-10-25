@@ -110,10 +110,16 @@
       </div>
 
       <div class="hero-right">
+        <button type="button" class="hero-info-card refresh-card-btn" (click)="refreshDoctorData()" title="Reload live schedule" style="cursor: pointer; border: none;">
+          <span>Live Sync</span>
+          <strong><i class="fa fa-refresh"></i> Refresh</strong>
+        </button>
+
         <div class="hero-info-card">
           <span>Today</span>
           <strong>{{ currentDate | date:'EEEE, MMMM d, y' }}</strong>
         </div>
+
         <div class="hero-info-card">
           <span>Performance</span>
           <strong>{{ completionRate }}%</strong>
